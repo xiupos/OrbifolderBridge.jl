@@ -1,16 +1,16 @@
+```@meta
+CurrentModule = OrbifolderBridge
+```
+
 # OrbifolderBridge
 
-[![Build Status](https://github.com/xiupos/OrbifolderBridge.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/xiupos/OrbifolderBridge.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://xiupos.github.io/OrbifolderBridge.jl/dev/)
+Documentation for [OrbifolderBridge](https://github.com/xiupos/OrbifolderBridge.jl).
 
-[日本語](README.ja.md)
-
-> **⚠ EXPERIMENTAL — NO MAINTENANCE GUARANTEE**
->
-> This package is a temporary bridge and is **not registered** in the Julia General registry.
-> It exists solely to expose the C++ `orbifolder`/`nonSUSYorbifolder` tools to OSCAR.jl users
-> until (if ever) the functionality is integrated upstream. Expect breaking changes without
-> notice. Do not depend on it in production code.
+!!! warning "Experimental — no maintenance guarantee"
+    This package is a temporary bridge and is **not registered** in the Julia General
+    registry. It exists solely to expose the C++ `orbifolder`/`nonSUSYorbifolder` tools to
+    OSCAR.jl users until (if ever) the functionality is integrated upstream. Expect breaking
+    changes without notice. Do not depend on it in production code.
 
 A Julia bridge to two C++ tools for constructing and analyzing heterotic string orbifold
 compactifications:
@@ -29,7 +29,7 @@ further mapped onto genuine `Oscar.RootSystem`/`Oscar.WeightLatticeElem` objects
 group and matter representations.
 
 **You must build `orbifolder`/`nonSUSYorbifolder` yourself** — this package does not bundle or
-auto-build them. See [Installation](#installation) below.
+auto-build them. See [Installation](@ref) below.
 
 ## Installation
 
@@ -43,9 +43,10 @@ Pkg.develop(url="https://github.com/xiupos/OrbifolderBridge.jl")
 ### Building the upstream tools
 
 Build whichever backend(s) you need from source and make sure the resulting binary is
-discoverable — either on `PATH`, or via the environment variables / `Preferences.jl` settings
-described below. See [`docs/upstream_notes.md`](docs/upstream_notes.md) for build dependencies
-(GSL, Boost, GNU Readline, and — for `nonSUSYorbifolder` — Autotools) and troubleshooting notes.
+discoverable — either on `PATH`, or via environment variables / [`Preferences.jl`](@ref
+set_orbifolder_binary!) settings. See the project's `docs/upstream_notes.md` (in the source
+repository) for build dependencies (GSL, Boost, GNU Readline, and — for `nonSUSYorbifolder` —
+Autotools) and troubleshooting notes.
 
 ```bash
 # nonSUSYorbifolder
@@ -80,7 +81,7 @@ set_orbifolder_binary!(:nonsusy, "/path/to/nonSUSYorbifolder")
 Each backend also needs its `Geometry/` directory (shipped space-group definition files, at
 the root of the source tree you built). By default it's found automatically next to the
 binary; override with `ORBIFOLDER_GEOMETRY_DIR`/`NONSUSYORBIFOLDER_GEOMETRY_DIR` or
-`set_orbifolder_geometry_dir!` if it isn't.
+[`set_orbifolder_geometry_dir!`](@ref) if it isn't.
 
 ## Quick start
 
@@ -130,77 +131,27 @@ models = [OrbifolderModel(; mode = :nonsusy, label = "M$i", point_group = "Z3_1_
 spectra = compute_spectra(models; ntasks = 8)  # asyncmap over subprocess launches; parsing is sequential
 ```
 
-## API
-
-### Model construction
-
-- `OrbifolderModel(; mode, label, point_group, shift, lattice = :E8xE8, wilson_lines = [])` —
-  construct a model. `shift` is a single 16-vector \\(V_1\\) or a pair \\((V_1, V_2)\\); see the
-  docstring for the full field reference.
-- `model_file_text(model)` — render the upstream `begin model ... end model` file text.
-
-### Computing model data
-
-Single-model, sequential:
-
-- `compute_spectrum(model)` → `Spectrum`
-- `compute_gauge_group(model)` → `GaugeGroup`
-- `compute_twist(model)` → `Twist`
-- `compute_shift_vectors(model)` → `Vector{ShiftVector}`
-- `compute_wilson_lines(model)` → `WilsonLines`
-
-Multi-model, parallel (`ntasks` keyword controls concurrency; see
-[Architecture](#architecture) below):
-
-- `compute_spectra`, `compute_gauge_groups`, `compute_twists`,
-  `compute_shift_vectors_batch`, `compute_wilson_lines_batch`
-
-### OSCAR mapping
-
-- `algebra_to_cartan_type(algebra)` → `(family::Symbol, rank::Int)`, e.g. `"SU(3)" -> (:A, 2)`
-- `gauge_group_root_systems(gauge_group)` → `Vector{RootSystem}`
-- `representation_weight(root_system, rep)` / `field_weights(root_systems, field)` → dominant
-  weight(s) matching the printed representation dimension(s), via `find_weight_of_dimension`
-  and (for negative/conjugate dimensions) `dual_weight`
-
-### Lower-level building blocks
-
-- `run_orbifolder_script(mode, commands; files, timeout)` — run a raw command list against
-  either backend and get back the text transcript
-- `split_transcript(text)` / `output_for(pairs, command)` — split a transcript into
-  `command => output` pairs
-- `parse_gauge_group`, `parse_spectrum`, `parse_twist`, `parse_shift_vectors`,
-  `parse_wilson_lines` — parse a specific command's output text directly
+See the [API Reference](@ref) for the full list of exported functions and types.
 
 ## Known limitations
 
 - Only the default vev-configuration (`"TestConfig1"`) is supported; switching
   vev-configurations is not yet implemented.
 - Allowed superpotential couplings (`cd couplings`) are not yet parsed — the command protocol
-  was explored but not fully worked out; see `docs/upstream_notes.md`.
-- `find_weight_of_dimension` resolves a representation's printed *dimension* to a weight via a
-  bounded search over small Dynkin-label combinations. This covers every representation that
-  actually appears in these models' output (fundamentals, adjoints, vectors, spinors, ...), but
-  is not a fully general inverse of the Weyl dimension formula.
+  was explored but not fully worked out.
+- [`find_weight_of_dimension`](@ref) resolves a representation's printed *dimension* to a
+  weight via a bounded search over small Dynkin-label combinations. This covers every
+  representation that actually appears in these models' output (fundamentals, adjoints,
+  vectors, spinors, ...), but is not a fully general inverse of the Weyl dimension formula.
 
 ## Architecture
 
-Each subprocess call runs in its own `mktempdir()`, so parallel calls (`compute_spectra` etc.)
-never share files. Only the "launch binary, wait, capture text" step is parallelized via
+Each subprocess call runs in its own `mktempdir()`, so parallel calls ([`compute_spectra`](@ref)
+etc.) never share files. Only the "launch binary, wait, capture text" step is parallelized via
 `asyncmap`; parsing — and especially building OSCAR/GAP objects — is done sequentially
 afterward, since GAP is not thread-safe.
 
-See [`docs/upstream_notes.md`](docs/upstream_notes.md) for how the two backends' command
-languages and output formats were reverse-engineered, and for the procedure to follow when
-upstream ships a new version.
-
-## Requirements
-
-- Julia ≥ 1.10
-- Oscar.jl ≥ 1
-- `orbifolder` and/or `nonSUSYorbifolder`, built from source (see above)
-
 ## License
 
-[MIT](LICENSE) for this bridge package. The upstream `orbifolder`/`nonSUSYorbifolder` tools
-you build and run separately are licensed under the GPL — see their respective repositories.
+MIT for this bridge package. The upstream `orbifolder`/`nonSUSYorbifolder` tools you build and
+run separately are licensed under the GPL — see their respective repositories.

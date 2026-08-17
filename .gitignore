@@ -1,2 +1,3 @@
 /Manifest*.toml
 /vendor/
+/docs/build/
