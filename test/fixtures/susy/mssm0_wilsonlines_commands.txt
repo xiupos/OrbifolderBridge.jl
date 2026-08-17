@@ -1,0 +1,6 @@
+load orbifolds(modelMSSM0.txt)
+cd MSSM0
+cd model
+print Wilson lines
+cd /
+exit
