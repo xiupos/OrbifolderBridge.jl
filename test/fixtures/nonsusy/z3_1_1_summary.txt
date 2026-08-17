@@ -1,0 +1,58 @@
+> load orbifolds(modelZ3_1_1.txt)
+
+  Load orbifolds from file "modelZ3_1_1.txt".
+  Orbifold "Z3_1_1" loaded.
+
+> cd Z3_1_1
+/Z3_1_1> cd spectrum
+/Z3_1_1/spectrum> print summary
+
+  Gauge group in vev-configuration "TestConfig1": SO(10) x SU(3) and SO(16) and U(1)
+  First U(1) is anomalous with tr Q_anom = 2.1e+04.
+
+    3 ( 10,  3,  1)_s  U(1) : (  -24) 
+    3 (  1,  3,  1)_s  U(1) : (   48) 
+   27 ( 10,  1,  1)_s  U(1) : (  -24) 
+   27 (  1,  1,  1)_s  U(1) : (   48) 
+   81 (  1, -3,  1)_s  U(1) : (    0) 
+
+    1 ( 16,  1,  1)_f  U(1) : (  -36) 
+    1 (  1,  1,-128)_f  U(1) : (    0) 
+    1 (-16,  1,  1)_f  U(1) : (   36) 
+    3 ( 16,  3,  1)_f  U(1) : (   12) 
+   27 ( 16,  1,  1)_f  U(1) : (   12) 
+    1 ( 10,  1, 16)_f  U(1) : (    0) 
+    3 (  1, -3, 16)_f  U(1) : (   24) 
+   27 (  1,  1, 16)_f  U(1) : (   24) 
+
+/Z3_1_1/spectrum> cd ..
+/Z3_1_1> cd model
+/Z3_1_1/model> print twist
+
+  v_1 = (    0,   1/3,   1/3,  -2/3)
+
+/Z3_1_1/model> print shift
+
+  V_1 = (  1/3,   1/3,  -2/3,     0,     0,     0,     0,     0),  (    0,     0,     0,     0,     0,     0,     0,     0)
+
+/Z3_1_1/model> print Wilson lines
+
+  Wilson lines identified on the orbifold: 
+    W_1 = W_2, W_3 = W_4, W_5 = W_6
+  Allowed orders of the Wilson lines: 3 3 3 3 3 3 
+
+  W_1 = (    0,     0,     0,     0,     0,     0,     0,     0),  (    0,     0,     0,     0,     0,     0,     0,     0)
+  W_2 = (    0,     0,     0,     0,     0,     0,     0,     0),  (    0,     0,     0,     0,     0,     0,     0,     0)
+  W_3 = (    0,     0,     0,     0,     0,     0,     0,     0),  (    0,     0,     0,     0,     0,     0,     0,     0)
+  W_4 = (    0,     0,     0,     0,     0,     0,     0,     0),  (    0,     0,     0,     0,     0,     0,     0,     0)
+  W_5 = (    0,     0,     0,     0,     0,     0,     0,     0),  (    0,     0,     0,     0,     0,     0,     0,     0)
+  W_6 = (    0,     0,     0,     0,     0,     0,     0,     0),  (    0,     0,     0,     0,     0,     0,     0,     0)
+
+/Z3_1_1/model> cd ..
+/Z3_1_1> cd gauge group
+/Z3_1_1/gauge group> print gauge group
+
+  Gauge group in vev-configuration "TestConfig1": SO(10) x SU(3) and SO(16) and U(1)_1
+
+
+eof

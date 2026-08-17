@@ -1,0 +1,13 @@
+load orbifolds(modelMSSM0.txt)
+cd MSSM0
+cd spectrum
+print summary
+cd ..
+cd model
+print twist
+print shift
+cd ..
+cd gauge group
+print gauge group
+cd /
+exit
