@@ -1,6 +1,6 @@
-using OrbifolderBridge
 using Test
+using OrbifolderBridge
 
-@testset "OrbifolderBridge.jl" begin
-    # Write your tests here.
+@testset "OrbifolderBridge.jl" verbose = true begin
+    include("test_core.jl")
 end
