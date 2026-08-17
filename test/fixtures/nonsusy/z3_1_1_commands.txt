@@ -1,0 +1,12 @@
+load orbifolds(modelZ3_1_1.txt)
+cd Z3_1_1
+cd spectrum
+print summary
+cd ..
+cd model
+print twist
+print shift
+print Wilson lines
+cd ..
+cd gauge group
+print gauge group
