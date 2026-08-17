@@ -101,3 +101,13 @@ struct WilsonLines
     identifications::Vector{Tuple{String,String}}
     orders::Vector{Int}
 end
+
+# These are plain value types (parsed data, not identity-bearing objects), so
+# equality/hashing should be structural rather than Julia's default identity
+# fallback for non-isbits structs.
+for T in (:GaugeGroup, :SpectrumField, :Spectrum, :Twist, :ShiftVector, :WilsonLine, :WilsonLines)
+    @eval begin
+        Base.:(==)(a::$T, b::$T) = all(getfield(a, f) == getfield(b, f) for f in fieldnames($T))
+        Base.hash(a::$T, h::UInt) = hash(ntuple(i -> getfield(a, i), fieldcount($T)), hash($T, h))
+    end
+end
