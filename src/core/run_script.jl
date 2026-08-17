@@ -12,7 +12,7 @@ Each call gets its own `mktempdir()`, so concurrent calls never share files
 written into that directory before the binary runs; `Geometry/` is staged
 automatically via [`orbifolder_geometry_dir`](@ref).
 
-The two backends are driven differently (see `docs/upstream_notes.md`):
+The two backends are driven differently (see `docs/src/upstream_notes.md`):
 `nonSUSYorbifolder` has a documented `script <file>` CLI mode that writes its
 transcript to `result_<file>`; `orbifolder` has no CLI batch mode, so commands
 are instead fed via `load program(<file>)` over stdin, followed by a `yes` to

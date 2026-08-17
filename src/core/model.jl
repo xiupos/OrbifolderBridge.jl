@@ -6,7 +6,7 @@ const _LATTICE_KEYWORD = Dict(:E8xE8 => "E8xE8", :Spin32 => "Spin32")
 A heterotic orbifold model: a point group (via a specific space-group file),
 a choice of ten-dimensional gauge lattice, up to two 16D shift vectors, and
 six 16D Wilson lines. This is the Julia-side counterpart of the upstream
-`begin model ... end model` file format (see `docs/upstream_notes.md`).
+`begin model ... end model` file format (see `docs/src/upstream_notes.md`).
 
 Construct with the keyword constructor below rather than calling this
 directly.
@@ -117,7 +117,7 @@ end
 Run `model` through the `orbifolder`/`nonSUSYorbifolder` backend and parse
 its four-dimensional gauge group in the backend's default vev-configuration
 (`"TestConfig1"`; switching vev-configurations is not yet supported, see
-`docs/upstream_notes.md`).
+`docs/src/upstream_notes.md`).
 """
 function compute_gauge_group(model::OrbifolderModel; timeout::Real = 120)
     out = _run_model_script(model, ["cd gauge group", "print gauge group"]; timeout = timeout)
@@ -130,7 +130,7 @@ end
 Run `model` through the `orbifolder`/`nonSUSYorbifolder` backend and parse
 its massless spectrum in the backend's default vev-configuration
 (`"TestConfig1"`; switching vev-configurations is not yet supported, see
-`docs/upstream_notes.md`).
+`docs/src/upstream_notes.md`).
 """
 function compute_spectrum(model::OrbifolderModel; timeout::Real = 120)
     out = _run_model_script(model, ["cd spectrum", "print summary"]; timeout = timeout)

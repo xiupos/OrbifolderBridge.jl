@@ -44,9 +44,8 @@ Pkg.develop(url="https://github.com/xiupos/OrbifolderBridge.jl")
 
 Build whichever backend(s) you need from source and make sure the resulting binary is
 discoverable — either on `PATH`, or via environment variables / [`Preferences.jl`](@ref
-set_orbifolder_binary!) settings. See the project's `docs/upstream_notes.md` (in the source
-repository) for build dependencies (GSL, Boost, GNU Readline, and — for `nonSUSYorbifolder` —
-Autotools) and troubleshooting notes.
+set_orbifolder_binary!) settings. See [Upstream Notes](@ref) for build dependencies (GSL,
+Boost, GNU Readline, and — for `nonSUSYorbifolder` — Autotools) and troubleshooting notes.
 
 ```bash
 # nonSUSYorbifolder
