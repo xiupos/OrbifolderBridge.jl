@@ -1,8 +1,8 @@
-# Upstream notes: orbifolder / nonSUSYorbifolder
+# Upstream Notes
 
-Findings from Phase 1 investigation (2026-08-17), covering how the two upstream
-C++ tools are built and driven, and what output they produce. This is the basis
-for the subprocess-driven design (`src/core/`).
+Findings on `orbifolder`/`nonSUSYorbifolder` from the initial investigation (2026-08-17),
+covering how the two upstream C++ tools are built and driven, and what output they produce.
+This is the basis for the subprocess-driven design (`src/core/`).
 
 ## Sources
 
