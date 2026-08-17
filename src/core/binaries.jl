@@ -24,7 +24,7 @@ Resolution order: the environment variable (`ORBIFOLDER_BIN` /
 [`set_orbifolder_binary!`](@ref), then a bare executable name on `PATH`.
 
 Throws an `ErrorException` with build instructions if no usable binary is found.
-See `docs/upstream_notes.md` for how to build the upstream tools.
+See `docs/src/upstream_notes.md` for how to build the upstream tools.
 """
 function orbifolder_binary(mode::Symbol)
     _check_mode(mode)
@@ -36,7 +36,7 @@ function orbifolder_binary(mode::Symbol)
     if path === nothing || !isfile(path)
         error(
             "Could not locate the $(mode === :susy ? "orbifolder" : "nonSUSYorbifolder") " *
-            "executable. Build it from source (see docs/upstream_notes.md) and either " *
+            "executable. Build it from source (see docs/src/upstream_notes.md) and either " *
             "put it on PATH, set the environment variable $(_binary_envvar(mode)), or call " *
             "set_orbifolder_binary!(:$mode, \"/path/to/binary\")."
         )

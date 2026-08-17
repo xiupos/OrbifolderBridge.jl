@@ -5,14 +5,14 @@
 
 Run a list of CPrompt `commands` against the `orbifolder` (`mode = :susy`) or
 `nonSUSYorbifolder` (`mode = :nonsusy`) binary and return the raw text
-transcript for [`src/susy`](@ref)/[`src/nonsusy`](@ref) parsers to consume.
+transcript for the `parse_*` functions in `src/core/parsers.jl` to consume.
 
 Each call gets its own `mktempdir()`, so concurrent calls never share files
 (see `parallel.jl`). `files` are extra inputs (e.g. `"model.txt" => ...`)
 written into that directory before the binary runs; `Geometry/` is staged
 automatically via [`orbifolder_geometry_dir`](@ref).
 
-The two backends are driven differently (see `docs/upstream_notes.md`):
+The two backends are driven differently (see `docs/src/upstream_notes.md`):
 `nonSUSYorbifolder` has a documented `script <file>` CLI mode that writes its
 transcript to `result_<file>`; `orbifolder` has no CLI batch mode, so commands
 are instead fed via `load program(<file>)` over stdin, followed by a `yes` to
