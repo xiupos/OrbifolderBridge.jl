@@ -126,9 +126,37 @@ exit                          # requires interactive "yes" confirmation
 ```
 
 `print summary` supports modifiers: `with labels`, `of sectors`, `of sector
-T(k,m,n)`, `of fixed points`, `no U1s`. A `couplings` subdirectory exists in
-the command tree (`cd couplings`) but is undocumented (no `.man` page) —
-needs interactive exploration in Phase 3 when building the coupling parser.
+T(k,m,n)`, `of fixed points`, `no U1s`. With `with labels`, each spectrum row
+gets one field label per copy appended after the charges (e.g. `F_1`, or for
+a multiplicity-9 row, nine space-separated labels `F_18 F_20 F_22 ...`) —
+useful for cross-referencing `couplings` output against `Spectrum` rows, not
+yet implemented in the Julia parser.
+
+## Couplings (`cd couplings`) — explored but not yet parsed
+
+A `couplings` subdirectory exists in the command tree but ships no `.man`
+page. `dir`/`help` inside it list:
+
+```
+print ...
+create coupling(fields)            optional: allowed fields(...)
+remove vanishing couplings
+find(fields)                       list allowed couplings involving fields
+find effective(fields)             same, effective couplings only
+load couplings(Filename) / save couplings(Filename)
+mass matrix(A B)
+auto create mass matrix(A B)
+```
+
+`fields` are referenced by the `with labels` names (`F_1`, `F_2`, ...).
+Calling `find(F_1 F_2)` directly after loading a model returns `W = 0` —
+`find` appears to search only couplings that were previously registered via
+`create coupling(...)`, not compute them from scratch on demand. Working out
+the exact create/find/save protocol (and the resulting output grammar for
+non-trivial `W`) needs more dedicated exploration than fits in Phase 3's
+budget; the gauge group / spectrum / twist / shift / Wilson line parsers in
+`src/core/parsers.jl` are solid and fixture-tested, but coupling parsing is
+deferred to a follow-up increment.
 
 Model definition file format (used by `load orbifolds(...)`), shared by both
 tools:
