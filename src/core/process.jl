@@ -39,9 +39,16 @@ Run `cmd`, feeding it `input` on stdin, and return its captured stdout as a
 if it exits with a non-zero status.
 """
 function run_capture(cmd::Cmd; input::AbstractString = "", timeout::Real = 120)
-    outbuf = IOBuffer()
-    errbuf = IOBuffer()
-    proc = run(pipeline(cmd, stdin = IOBuffer(input), stdout = outbuf, stderr = errbuf); wait = false)
+    outpipe = Pipe()
+    errpipe = Pipe()
+    proc = run(pipeline(cmd, stdin = IOBuffer(input), stdout = outpipe, stderr = errpipe); wait = false)
+    close(outpipe.in)
+    close(errpipe.in)
+    # Reading the Pipe (rather than an IOBuffer target) blocks until the child
+    # closes its end, so fetch() below can't race process_running/wait(proc)
+    # going true before the copied bytes have actually landed.
+    outtask = @async read(outpipe, String)
+    errtask = @async read(errpipe, String)
 
     t0 = time()
     while process_running(proc)
@@ -52,10 +59,10 @@ function run_capture(cmd::Cmd; input::AbstractString = "", timeout::Real = 120)
         end
         sleep(0.02)
     end
-    wait(proc) # process_running can go false before async stdout/stderr copying finishes
+    wait(proc)
 
-    out = String(take!(outbuf))
-    err = String(take!(errbuf))
+    out = fetch(outtask)
+    err = fetch(errtask)
     if !success(proc)
         throw(OrbifolderProcessError("subprocess failed: $cmd", proc.exitcode, out, err))
     end
