@@ -4,10 +4,12 @@ authors = ["xiupos <me@xiupos.net> and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
+Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 
 [compat]
 julia = "1.10.10"
+Oscar = "1"
 Preferences = "1"
 
 [extras]
