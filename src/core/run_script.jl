@@ -5,7 +5,7 @@
 
 Run a list of CPrompt `commands` against the `orbifolder` (`mode = :susy`) or
 `nonSUSYorbifolder` (`mode = :nonsusy`) binary and return the raw text
-transcript for [`src/susy`](@ref)/[`src/nonsusy`](@ref) parsers to consume.
+transcript for the `parse_*` functions in `src/core/parsers.jl` to consume.
 
 Each call gets its own `mktempdir()`, so concurrent calls never share files
 (see `parallel.jl`). `files` are extra inputs (e.g. `"model.txt" => ...`)
