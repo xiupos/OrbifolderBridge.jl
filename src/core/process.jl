@@ -52,6 +52,7 @@ function run_capture(cmd::Cmd; input::AbstractString = "", timeout::Real = 120)
         end
         sleep(0.02)
     end
+    wait(proc) # process_running can go false before async stdout/stderr copying finishes
 
     out = String(take!(outbuf))
     err = String(take!(errbuf))
