@@ -225,6 +225,105 @@ struct GaugeSector
 end
 
 """
+    VEVAssignment(field, value)
+
+A deterministic numerical VEV assignment to an individual [`FieldID`](@ref).
+The supported SUSY command language stores VEVs as floating-point values and
+does not expose a weight-component selector. Random assignments are
+intentionally not represented.
+"""
+struct VEVAssignment
+    field::FieldID
+    value::Float64
+
+    function VEVAssignment(field::FieldID, value::Real)
+        converted = Float64(value)
+        isfinite(converted) || throw(ArgumentError("VEV values must be finite"))
+        return new(field, converted)
+    end
+end
+
+"""
+    FieldVEV
+
+A numerical VEV read back from upstream, connected to both its stable `field`
+identity and the active configuration-dependent `label`.
+"""
+struct FieldVEV
+    field::FieldID
+    label::String
+    value::Float64
+end
+
+"""
+    VEVConfigurationSpec
+
+A replayable description of a derived VEV configuration. `nothing` preserves
+the base configuration's observable non-abelian or U(1) selection; an empty
+vector selects none. Fixed `assignments` and `recompute_unbroken_group` require
+the SUSY backend.
+"""
+struct VEVConfigurationSpec
+    configuration::VEVConfigurationRef
+    base::VEVConfigurationRef
+    observable_nonabelian::Union{Nothing,Vector{Int}}
+    observable_u1::Union{Nothing,Vector{Int}}
+    assignments::Vector{VEVAssignment}
+    recompute_unbroken_group::Bool
+end
+
+function VEVConfigurationSpec(;
+    name::AbstractString,
+    base::VEVConfigurationRef = VEVConfigurationRef("TestConfig1"),
+    observable_nonabelian::Union{Nothing,AbstractVector{<:Integer}} = nothing,
+    observable_u1::Union{Nothing,AbstractVector{<:Integer}} = nothing,
+    assignments::AbstractVector{VEVAssignment} = VEVAssignment[],
+    recompute_unbroken_group::Bool = !isempty(assignments),
+)
+    nonabelian = observable_nonabelian === nothing ? nothing : Int.(observable_nonabelian)
+    u1 = observable_u1 === nothing ? nothing : Int.(observable_u1)
+    for (description, indices) in (("observable_nonabelian", nonabelian), ("observable_u1", u1))
+        indices === nothing && continue
+        all(>(0), indices) || throw(ArgumentError("$description indices must be positive"))
+        length(unique(indices)) == length(indices) ||
+            throw(ArgumentError("$description indices must be unique"))
+    end
+    fields = getfield.(assignments, :field)
+    length(unique(fields)) == length(fields) ||
+        throw(ArgumentError("each field may have at most one VEV assignment"))
+    return VEVConfigurationSpec(
+        VEVConfigurationRef(name),
+        base,
+        nonabelian,
+        u1,
+        collect(assignments),
+        recompute_unbroken_group,
+    )
+end
+
+"""
+    VEVConfigurationResult
+
+Materialized configuration data returned by
+[`materialize_vev_configuration`](@ref). `resolution_transcript` records the
+base-field lookup and `transcript` records configuration construction and
+inspection. `detailed_spectrum` is `nothing` when a non-abelian factor is
+hidden because upstream folds that representation's dimension into summary
+multiplicities, which cannot be assigned unambiguously to one `FieldID`.
+"""
+struct VEVConfigurationResult
+    specification::VEVConfigurationSpec
+    configuration::VEVConfigurationSummary
+    assignments::Vector{FieldVEV}
+    gauge_sector::GaugeSector
+    spectrum::Spectrum
+    detailed_spectrum::Union{Nothing,DetailedSpectrum}
+    backend::BackendInfo
+    resolution_transcript::String
+    transcript::String
+end
+
+"""
     VEVConfigurationError <: Exception
 
 Thrown when upstream rejects an explicit configuration selection. The full
@@ -246,6 +345,7 @@ for T in (
     :GaugeGroup, :SpectrumField, :Spectrum, :FieldID, :Sector, :FieldLocalization,
     :DetailedField, :DetailedSpectrum, :Twist, :ShiftVector, :WilsonLine, :WilsonLines,
     :VEVConfigurationRef, :VEVConfigurationSummary, :GaugeSector,
+    :VEVAssignment, :FieldVEV, :VEVConfigurationSpec, :VEVConfigurationResult,
 )
     @eval begin
         Base.:(==)(a::$T, b::$T) = all(getfield(a, f) == getfield(b, f) for f in fieldnames($T))

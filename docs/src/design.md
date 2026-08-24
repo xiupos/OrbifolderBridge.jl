@@ -80,9 +80,23 @@ without a reference remain for compatibility, but reproducible code should not
 depend on the initially selected `TestConfig1`. [`GaugeSector`](@ref) records
 observable and hidden factor indices separately from algebra names.
 
-`print configs` exposes field labels that carry VEVs but not their numerical
-assignments. Typed mutation and full assignment inspection therefore remain
-deferred until a stable non-interactive grammar has been fixture-tested.
+[`VEVConfigurationSpec`](@ref) is an immutable replay description rather than
+a handle to process-local upstream state. Materialization resolves stable
+field identities in the base configuration, then reconstructs the derived
+configuration in a second isolated run. Both transcripts are retained in the
+result. The common subset covers configuration derivation and observable
+sector selection; fixed VEVs and unbroken-group recomputation are advertised
+only by the SUSY backend.
+
+SUSY accepts VEVs by active field label and stores floating-point values. The
+bridge resolves labels from `FieldID`, excludes random values, verifies
+nonzero assignments through internal-information readback, and initially
+restricts assignments to non-abelian singlets because upstream exposes no
+weight-component selector. non-SUSY's prompt has no equivalent VEV operation.
+
+When a non-abelian factor is hidden, upstream folds its representation
+dimension into grouped spectrum multiplicities. A derived result therefore
+does not claim to provide an unambiguous `DetailedSpectrum` in that case.
 
 ### Gauge and representation data
 

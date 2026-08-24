@@ -28,6 +28,8 @@ end
             @test info.binary == binary
             @test info.geometry_dir == geometry
             @test supports(info, :detailed_spectrum)
+            @test supports(info, :field_vevs)
+            @test supports(info, :unbroken_gauge_group)
             @test !supports(info, :effective_couplings)
 
             result = check_backend(:susy)
@@ -52,6 +54,8 @@ end
             info = backend_info(:nonsusy)
             @test info.kind === :nonsusy
             @test info.version == v"1.0.0"
+            @test supports(info, :vev_configuration_mutation)
+            @test !supports(info, :field_vevs)
         end
     finally
         rm(dir; recursive = true)

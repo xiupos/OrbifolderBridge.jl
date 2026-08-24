@@ -1,0 +1,25 @@
+/MSSM0/vev-config> vev(F_1)=1.0
+
+  Vev of field "F_1" set to 1.00.
+
+/MSSM0/vev-config> print configs
+
+  list of vev-configurations:
+     label             | field label # | fields with VEV
+    -----------------------------------------------------------------------------------------------------
+     "StandardConfig1" |        1 /  1 |
+     "TestConfig1"     |        1 /  1 |
+  -> "BridgeConfig1"   |        1 /  1 | <F_1>
+
+/MSSM0/spectrum> print(F_1) with internal information
+
+    F_1
+  sector (k,l)        : (0, 0)
+  fixed point n_a     : (0, 0, 0, 0, 0, 0)
+
+  rep. in config      : (  1,  1,  1,  1,  1)_l  U(1): (    0)
+  representation      : (  1,  1,  1,  1,  1)_l  U(1): (   -1)
+
+  right-moving q_sh   : (0, 0, -1, 0)
+  vev                 : 1.00
+  field no.           : 11

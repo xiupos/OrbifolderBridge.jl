@@ -137,8 +137,9 @@ presenting the related public API.
 
 ## Known limitations
 
-- VEV configurations can be listed and selected explicitly, but typed
-  configuration creation and numerical VEV assignment are not yet supported.
+- Derived configurations and observable sectors are replayable on both
+  backends; fixed VEV assignment and unbroken-group recomputation are
+  available only with SUSY orbifolder.
 - Allowed superpotential couplings (`cd couplings`) are not yet parsed — the command protocol
   was explored but not fully worked out.
 - [`find_weight_of_dimension`](@ref) resolves a representation's printed *dimension* to a

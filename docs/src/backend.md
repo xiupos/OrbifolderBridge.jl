@@ -63,7 +63,8 @@ supports(info, :effective_couplings)     # false in the current bridge
 
 The capability set also records backend-specific differences. In particular,
 `:coupling_refined_inequivalence` is available for SUSY 1.2.1 but not
-non-SUSY 1.0.
+non-SUSY 1.0. Both backends advertise `:vev_configuration_mutation`, while
+`:field_vevs` and `:unbroken_gauge_group` are SUSY-only capabilities.
 
 For setup diagnostics, [`check_backend`](@ref) catches configuration,
 execution, timeout, and compatibility failures and returns a

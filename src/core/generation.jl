@@ -166,17 +166,22 @@ retains the legacy backend-default behavior.
 """
 function classify_model(
     model::OrbifolderModel;
-    config::Union{Nothing,VEVConfigurationRef} = nothing,
+    config::Union{Nothing,VEVConfigurationRef,VEVConfigurationSpec} = nothing,
     generations::Integer = 3,
     timeout::Real = 120,
 )
     generations >= 0 || throw(ArgumentError("generations must be nonnegative"))
     info = backend_info(model.mode; timeout = min(timeout, 30))
     command = "analyze config $(Int(generations))generations"
-    commands = config === nothing ? ["cd vev-config", command] :
-               ["cd vev-config", _use_configuration_command(config), command]
-    output = _run_model_script(model, commands; timeout = timeout)
-    _validate_configuration_selection(output, config)
+    output = if config isa VEVConfigurationSpec
+        _run_configuration_spec(model, config, [command]; timeout = timeout).output
+    else
+        commands = config === nothing ? ["cd vev-config", command] :
+                   ["cd vev-config", _use_configuration_command(config), command]
+        result = _run_model_script(model, commands; timeout = timeout)
+        _validate_configuration_selection(result, config)
+        result
+    end
     block = output_for(split_transcript(output), command)
     return _classification_from_output(block, Int(generations), info)
 end
@@ -189,13 +194,23 @@ configuration. `config = nothing` retains the legacy backend-default behavior.
 """
 function compute_anomaly_report(
     model::OrbifolderModel;
-    config::Union{Nothing,VEVConfigurationRef} = nothing,
+    config::Union{Nothing,VEVConfigurationRef,VEVConfigurationSpec} = nothing,
     timeout::Real = 120,
 )
     info = backend_info(model.mode; timeout = min(timeout, 30))
-    commands = _configuration_commands(config, ["cd gauge group", "print anomaly info"])
-    output = _run_model_script(model, commands; timeout = timeout)
-    _validate_configuration_selection(output, config)
+    output = if config isa VEVConfigurationSpec
+        _run_configuration_spec(
+            model,
+            config,
+            ["cd ..", "cd gauge group", "print anomaly info"];
+            timeout = timeout,
+        ).output
+    else
+        commands = _configuration_commands(config, ["cd gauge group", "print anomaly info"])
+        result = _run_model_script(model, commands; timeout = timeout)
+        _validate_configuration_selection(result, config)
+        result
+    end
     block = output_for(split_transcript(output), "print anomaly info")
     return _anomaly_report_from_output(block, info)
 end
