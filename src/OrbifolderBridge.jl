@@ -4,6 +4,8 @@ using Oscar
 
 export orbifolder_binary, set_orbifolder_binary!
 export orbifolder_geometry_dir, set_orbifolder_geometry_dir!
+export BackendInfo, BackendCompatibilityError, BackendSelfTest
+export backend_info, supports, check_backend
 export OrbifolderProcessError, OrbifolderTimeoutError, run_capture
 export run_orbifolder_script
 export split_transcript, output_for, parse_rational, parse_rational_vector
@@ -24,6 +26,7 @@ export compute_shift_vectors_batch, compute_wilson_lines_batch
 
 include("core/binaries.jl")
 include("core/process.jl")
+include("core/backend.jl")
 include("core/run_script.jl")
 include("core/transcript.jl")
 include("core/types.jl")

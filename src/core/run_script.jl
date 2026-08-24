@@ -1,5 +1,5 @@
 """
-    run_orbifolder_script(mode::Symbol, commands::Vector{<:AbstractString};
+    _run_orbifolder_script(mode::Symbol, commands::Vector{<:AbstractString};
                            files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
                            timeout::Real = 120) -> String
 
@@ -19,7 +19,7 @@ are instead fed via `load program(<file>)` over stdin, followed by a `yes` to
 confirm the trailing `exit` command (the quit confirmation reads raw stdin,
 not the command file) and its transcript is read back from stdout.
 """
-function run_orbifolder_script(
+function _run_orbifolder_script(
     mode::Symbol,
     commands::Vector{<:AbstractString};
     files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
@@ -52,4 +52,23 @@ function run_orbifolder_script(
             )
         end
     end
+end
+
+"""
+    run_orbifolder_script(mode::Symbol, commands::Vector{<:AbstractString};
+                           files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
+                           timeout::Real = 120) -> String
+
+Run commands using the configured backend and return its raw transcript. The
+backend kind and output version are validated before the transcript is
+returned. See [`backend_info`](@ref) for configuration inspection.
+"""
+function run_orbifolder_script(
+    mode::Symbol,
+    commands::Vector{<:AbstractString};
+    files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
+    timeout::Real = 120,
+)
+    backend_info(mode; timeout = min(timeout, 30))
+    return _run_orbifolder_script(mode, commands; files = files, timeout = timeout)
 end
