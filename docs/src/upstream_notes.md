@@ -155,6 +155,44 @@ backend field number as identity. The parser verifies that the translation
 agrees on both sides and that individual fields reproduce every grouped
 summary multiplicity.
 
+## Model generation, classification, and inequivalence
+
+Both supported backends implement:
+
+```
+create random orbifold from(Label) if(SM PS SU5 inequivalent 3generations)
+    save to(models.txt) #models(10) use(1,1,0,0,0,0,0,0)
+load orbifolds(candidates.txt) inequivalent
+save orbifolds(representatives.txt)
+```
+
+The eight `use` entries denote two compactification-shift slots and six Wilson
+lines; `1` inherits and `0` randomizes. Internally nonSUSYorbifolder has an
+additional leading Witten-shift entry fixed to `true`, so its eight command
+entries are stored at indices 1--8 rather than 0--7. The non-SUSY model-file
+format consequently contains three shifts plus six Wilson lines, whereas the
+SUSY format contains two shifts plus six Wilson lines.
+
+`analyze config Xgenerations` calls the same `CAnalyseModel::AnalyseModel`
+predicate used by generation filters. It checks SM, Pati--Salam, and SU(5)
+embeddings, net generation count, and the corresponding vector-like spectrum
+condition, creating `SMConfig*`, `PSConfig*`, or `SU5Config*` configurations
+on success. `print anomaly info` reports the upstream anomaly calculation and
+ends successful examples with `All anomalies are universal`.
+
+SUSY 1.2.1 additionally accepts `compare #couplings of order(X)`, for
+`X >= 3`, when generating or loading inequivalent models. non-SUSY 1.0 has no
+equivalent option. Both programs seed `CRandomModel` with `srand(time(NULL))`;
+the command language exposes no seed. Generated searches are therefore not
+bitwise replayable from a request alone.
+
+Random generation starts an upstream child process. Its process identifier is
+an implementation detail and is redacted from typed bridge results. The bridge
+follows the generation command with upstream's internal `wait(1)` so the child
+completes before the isolated working directory is collected. The model-file
+parser applies the mode-specific shift count and accepts only zero-valued
+trailing vectors beyond the required data.
+
 ## Couplings (`cd couplings`) — explored but not yet parsed
 
 A `couplings` subdirectory exists in the command tree but ships no `.man`

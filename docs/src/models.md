@@ -6,8 +6,8 @@ CurrentModule = OrbifolderBridge
 
 An [`OrbifolderModel`](@ref) describes the data needed by upstream to construct
 a heterotic orbifold model: a space group, a ten-dimensional gauge lattice,
-one or two shift vectors, and up to six Wilson lines. It is an input value, not
-a cached upstream session.
+up to three shift vectors, and six Wilson-line slots. It is an input value,
+not a cached upstream session.
 
 ## Constructing a model
 
@@ -30,9 +30,10 @@ Wilson lines have 16 rational entries. Missing Wilson lines are filled with
 zero vectors.
 
 For a SUSY cyclic point group, `shift` can be one vector; a SUSY product point
-group uses `(V1, V2)`. The non-SUSY backend reserves its two slots for the
-Witten ``\mathbb Z_2`` embedding and the compactification point-group
-embedding, respectively, as shown above.
+group uses `(V1, V2)`. The non-SUSY backend uses three slots: the Witten
+``\mathbb Z_2`` embedding followed by two compactification point-group slots.
+The third slot is zero for the cyclic example above and is filled
+automatically when omitted.
 
 The rendered upstream input is deterministic and can be inspected without
 launching a process:

@@ -1,0 +1,5 @@
+  Analyzing vev-configuration "TestConfig1" ...
+  One vev-configuration identified, labeled "SMConfig1" and selected.
+  Using label #2 of the fields.
+
+  Gauge group in vev-configuration "SMConfig1": SU(3)_C x SU(2)_L and U(1)_Y

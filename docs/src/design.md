@@ -126,6 +126,14 @@ diagnostic failure rather than silent partial parsing. Fixtures identify the
 backend and version that produced them, and SUSY and non-SUSY fixtures remain
 separate whenever their command protocol or output grammar differs.
 
+Random generation is an upstream operation and currently has no seed option:
+the supported programs initialize their generator from wall-clock time. The
+bridge therefore records the request, accepted model blocks, backend,
+warnings, and sanitized transcript as provenance rather than claiming that
+rerunning a request reproduces its random candidates. Generated side files
+are read inside the isolated temporary directory before cleanup and returned
+only as parsed values.
+
 ## Reproducibility and provenance
 
 Computed values should be traceable to:

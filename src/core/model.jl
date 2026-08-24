@@ -18,8 +18,14 @@ struct OrbifolderModel
     lattice::Symbol
     shift1::Vector{Rational{Int}}
     shift2::Vector{Rational{Int}}
+    shift3::Vector{Rational{Int}}
     wilson_lines::Vector{Vector{Rational{Int}}}
 end
+
+Base.:(==)(a::OrbifolderModel, b::OrbifolderModel) =
+    all(getfield(a, f) == getfield(b, f) for f in fieldnames(OrbifolderModel))
+Base.hash(model::OrbifolderModel, h::UInt) =
+    hash(ntuple(i -> getfield(model, i), fieldcount(OrbifolderModel)), hash(OrbifolderModel, h))
 
 function _validate_vector16(name::AbstractString, v::AbstractVector)
     length(v) == 16 || throw(ArgumentError("$name must have length 16, got $(length(v))"))
@@ -40,9 +46,9 @@ Construct an [`OrbifolderModel`](@ref).
 - `shift`: for `mode = :susy`, either a single 16-entry vector \$V_1\$ (for a
   \$\\mathbb{Z}_M\$ point group) or a pair `(V_1, V_2)` (for
   \$\\mathbb{Z}_M \\times \\mathbb{Z}_N\$). For `mode = :nonsusy`, the pair
-  follows upstream's two shift slots: the Witten \$\\mathbb{Z}_2\$ embedding
-  followed by the compactification point-group embedding. A single vector
-  fills the first slot and leaves the second zero.
+  follows upstream's three shift slots: the Witten \$\\mathbb{Z}_2\$ embedding
+  followed by up to two compactification point-group embeddings. A single
+  vector fills the first slot and leaves the remaining slots zero.
 - `lattice`: `:E8xE8` or `:Spin32` (the \$E_8 \\times E_8\$ or
   \$\\mathrm{Spin}(32)/\\mathbb{Z}_2\$ ten-dimensional gauge lattice)
 - `wilson_lines`: up to six 16-entry vectors \$W_1,\\dots,W_6\$; defaults to
@@ -60,19 +66,32 @@ function OrbifolderModel(;
     haskey(_LATTICE_KEYWORD, lattice) ||
         throw(ArgumentError("lattice must be :E8xE8 or :Spin32, got :$lattice"))
 
-    shift1, shift2 = if shift isa Tuple
-        length(shift) == 2 || throw(ArgumentError("shift tuple must have length 2, got $(length(shift))"))
-        _validate_vector16("shift[1]", shift[1]), _validate_vector16("shift[2]", shift[2])
-    else
-        _validate_vector16("shift", shift), zeros(Rational{Int}, 16)
-    end
+    max_shifts = mode === :susy ? 2 : 3
+    shifts = shift isa Tuple ? collect(shift) : [shift]
+    1 <= length(shifts) <= max_shifts || throw(ArgumentError(
+        "shift must contain between 1 and $max_shifts vectors for mode :$mode, got $(length(shifts))",
+    ))
+    parsed_shifts = [
+        i <= length(shifts) ? _validate_vector16("shift[$i]", shifts[i]) :
+        zeros(Rational{Int}, 16)
+        for i in 1:3
+    ]
 
     length(wilson_lines) <= 6 ||
         throw(ArgumentError("wilson_lines must have at most 6 entries, got $(length(wilson_lines))"))
     wl = [_validate_vector16("wilson_lines[$i]", w) for (i, w) in enumerate(wilson_lines)]
     append!(wl, [zeros(Rational{Int}, 16) for _ in 1:(6-length(wl))])
 
-    return OrbifolderModel(mode, String(label), "Geometry/Geometry_$(point_group).txt", lattice, shift1, shift2, wl)
+    return OrbifolderModel(
+        mode,
+        String(label),
+        "Geometry/Geometry_$(point_group).txt",
+        lattice,
+        parsed_shifts[1],
+        parsed_shifts[2],
+        parsed_shifts[3],
+        wl,
+    )
 end
 
 _format_rational(r::Rational{Int}) = "$(numerator(r))/$(denominator(r))"
@@ -85,14 +104,15 @@ Render `model` in the upstream `begin model ... end model` file format
 expected by the `load orbifolds(...)` command.
 """
 function model_file_text(model::OrbifolderModel)
+    shifts = model.mode === :susy ? [model.shift1, model.shift2] :
+             [model.shift1, model.shift2, model.shift3]
     lines = [
         "begin model",
         "Label:$(model.label)",
         "SpaceGroup:$(model.space_group_file)",
         "Lattice:$(_LATTICE_KEYWORD[model.lattice])",
         "Shifts and Wilsonlines:",
-        _format_vector16(model.shift1),
-        _format_vector16(model.shift2),
+        (_format_vector16(v) for v in shifts)...,
         (_format_vector16(w) for w in model.wilson_lines)...,
         "end model",
     ]
@@ -100,6 +120,101 @@ function model_file_text(model::OrbifolderModel)
 end
 
 _model_filename(model::OrbifolderModel) = "model_$(model.label).txt"
+
+"""
+    UpstreamModelParseError <: Exception
+
+Thrown when an upstream model file does not match the supported
+`begin model ... end model` grammar. The complete source `text` is retained
+for diagnosis.
+"""
+struct UpstreamModelParseError <: Exception
+    message::String
+    text::String
+end
+
+Base.showerror(io::IO, e::UpstreamModelParseError) =
+    print(io, "UpstreamModelParseError: ", e.message)
+
+function _parse_model_vector(line::AbstractString, text::AbstractString)
+    tokens = filter(!isempty, split(strip(line), r"[\s,]+"))
+    length(tokens) == 16 || throw(UpstreamModelParseError(
+        "shift and Wilson-line vectors must contain 16 entries, got $(length(tokens))",
+        String(text),
+    ))
+    try
+        return parse_rational.(tokens)
+    catch e
+        e isa InterruptException && rethrow()
+        throw(UpstreamModelParseError("invalid rational in shift or Wilson-line vector", String(text)))
+    end
+end
+
+"""
+    parse_orbifolder_models(text::AbstractString; mode::Symbol) -> Vector{OrbifolderModel}
+
+Parse one or more upstream `begin model ... end model` blocks. SUSY files
+contain two shifts and six Wilson lines; non-SUSY files contain its Witten
+shift, two compactification-shift slots, and six Wilson lines. Zero-valued
+trailing vectors are accepted, while nonzero or malformed trailing data is
+rejected.
+"""
+function parse_orbifolder_models(text::AbstractString; mode::Symbol)
+    _check_mode(mode)
+    raw = String(text)
+    block_pattern = r"(?ms)^\s*begin model\s*$\n(.*?)^\s*end model\s*$"
+    matches = collect(eachmatch(block_pattern, raw))
+    blocks = [m.captures[1] for m in matches]
+    isempty(blocks) && throw(UpstreamModelParseError("no complete model blocks found", raw))
+    isempty(strip(replace(raw, block_pattern => ""))) || throw(UpstreamModelParseError(
+        "unsupported text outside model blocks",
+        raw,
+    ))
+
+    models = OrbifolderModel[]
+    for block in blocks
+        label_match = match(r"(?m)^\s*Label:\s*(\S.*?)\s*$", block)
+        space_match = match(r"(?m)^\s*SpaceGroup:\s*(\S.*?)\s*$", block)
+        lattice_match = match(r"(?m)^\s*Lattice:\s*(\S+)\s*$", block)
+        marker = match(r"(?m)^\s*Shifts and Wilsonlines:\s*$", block)
+        any(isnothing, (label_match, space_match, lattice_match, marker)) &&
+            throw(UpstreamModelParseError("model block is missing a required header", raw))
+
+        lattice = lattice_match.captures[1] == "E8xE8" ? :E8xE8 :
+                  lattice_match.captures[1] == "Spin32" ? :Spin32 : nothing
+        lattice === nothing && throw(UpstreamModelParseError(
+            "unsupported lattice $(lattice_match.captures[1])",
+            raw,
+        ))
+
+        vector_text = block[nextind(block, marker.offset + ncodeunits(marker.match) - 1):end]
+        lines = filter(line -> !isempty(strip(line)), split(vector_text, '\n'))
+        required_vectors = mode === :susy ? 8 : 9
+        length(lines) >= required_vectors || throw(UpstreamModelParseError(
+            "model block contains fewer than the required shift and Wilson-line vectors",
+            raw,
+        ))
+        vectors = [_parse_model_vector(line, raw) for line in lines]
+        all(v -> all(iszero, v), vectors[required_vectors+1:end]) ||
+            throw(UpstreamModelParseError(
+                "model block contains unsupported nonzero trailing vector data",
+                raw,
+            ))
+        shift3 = mode === :nonsusy ? vectors[3] : zeros(Rational{Int}, 16)
+        wilson_start = mode === :nonsusy ? 4 : 3
+        push!(models, OrbifolderModel(
+            mode,
+            strip(label_match.captures[1]),
+            strip(space_match.captures[1]),
+            lattice,
+            vectors[1],
+            vectors[2],
+            shift3,
+            vectors[wilson_start:wilson_start+5],
+        ))
+    end
+    return models
+end
 
 # Run `commands` after loading `model`, and return the raw transcript.
 function _run_model_script(model::OrbifolderModel, commands::Vector{<:AbstractString}; timeout::Real = 120)
@@ -177,7 +292,7 @@ end
 
 Run `model` through the backend and parse its shift vector(s) as reported by
 the backend (which may differ in presentation, though not value, from
-`model.shift1`/`model.shift2`).
+the applicable `model.shift1`/`model.shift2`/`model.shift3` values).
 """
 function compute_shift_vectors(model::OrbifolderModel; timeout::Real = 120)
     out = _run_model_script(model, ["cd model", "print shift"]; timeout = timeout)

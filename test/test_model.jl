@@ -30,25 +30,23 @@ const _SUSY_WL3 = [
     m = OrbifolderModel(; mode = :susy, label = "M", point_group = "Z3_1_1", shift = zeros(Int, 16))
     @test length(m.wilson_lines) == 6
     @test all(iszero, m.shift2)
+    @test all(iszero, m.shift3)
 end
 
 @testset "model_file_text: format and round-trippable values" begin
-    # The upstream file format is exactly 2 shift lines + 6 Wilson-line lines
-    # after "Shifts and Wilsonlines:" (CWilsonLines::LoadWilsonLines reads
-    # exactly LatticeDim = 6 lines, per cspacegroupelement.h) -- the shipped
-    # fixtures happen to carry one harmless extra zero line that upstream's
-    # loader silently ignores, so we check structure/values here rather than
-    # byte-for-byte equality against those fixtures.
+    # nonSUSYorbifolder reads 3 shifts (the Witten embedding and two
+    # compactification slots) plus 6 Wilson lines. SUSY orbifolder reads 2
+    # shifts plus the same 6 Wilson lines.
     m_nonsusy = OrbifolderModel(;
         mode = :nonsusy, label = "Z3_1_1", point_group = "Z3_1_1",
         shift = (_NONSUSY_SHIFT1, _NONSUSY_SHIFT2),
     )
     text = model_file_text(m_nonsusy)
-    data_lines = split(text, '\n')[6:13]
-    @test length(data_lines) == 8
+    data_lines = split(text, '\n')[6:14]
+    @test length(data_lines) == 9
     @test data_lines[1] == "0/1 0/1 0/1 1/1 0/1 0/1 0/1 0/1 0/1 0/1 0/1 1/1 0/1 0/1 0/1 0/1"
     @test data_lines[2] == "1/3 1/3 -2/3 0/1 0/1 0/1 0/1 0/1 0/1 0/1 0/1 0/1 0/1 0/1 0/1 0/1"
-    @test all(l -> l == join(fill("0/1", 16), " "), data_lines[3:8])
+    @test all(l -> l == join(fill("0/1", 16), " "), data_lines[3:9])
     @test startswith(text, "begin model\nLabel:Z3_1_1\nSpaceGroup:Geometry/Geometry_Z3_1_1.txt\nLattice:E8xE8\n")
     @test endswith(text, "end model\n")
 
