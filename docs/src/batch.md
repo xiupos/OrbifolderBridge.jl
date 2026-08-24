@@ -35,6 +35,12 @@ is useful because OSCAR also exports a function named `is_consistent`; an
 unqualified call is ambiguous after both packages have been brought into scope
 with `using`.
 
+```@docs
+ConsistencyResult
+check_consistency
+is_consistent
+```
+
 ## Filtering a collection
 
 ```julia
@@ -47,6 +53,11 @@ valid_models = [
 
 [`partition_consistent_models`](@ref) returns the valid and invalid subsets in
 input order when both are needed.
+
+```@docs
+check_consistency_batch
+partition_consistent_models
+```
 
 ## Computing many results
 
@@ -64,14 +75,7 @@ The available batch functions mirror the inexpensive single-model operations.
 Detailed spectra currently use the single-model API because their upstream
 transcripts are substantially larger.
 
-## Consistency and batch API
-
 ```@docs
-ConsistencyResult
-check_consistency
-is_consistent
-check_consistency_batch
-partition_consistent_models
 compute_spectra
 compute_gauge_groups
 compute_twists

@@ -23,6 +23,11 @@ group.n_u1
 field representation, plus the number of ``U(1)`` factors and the active VEV
 configuration label.
 
+```@docs
+compute_gauge_group
+GaugeGroup
+```
+
 ## Grouped spectrum
 
 ```julia
@@ -42,6 +47,12 @@ denotes the conjugate representation. `charges` contains exact rational
 
 The grouped view intentionally does not expand multiplicities. It is efficient
 for representation counts and gauge-level summaries.
+
+```@docs
+compute_spectrum
+SpectrumField
+Spectrum
+```
 
 ## Individual fields
 
@@ -65,6 +76,15 @@ Every [`DetailedField`](@ref) contains:
 The parser verifies that individual fields reconstruct every summary
 multiplicity. It also rejects duplicate identities, conflicting localization,
 or an incomplete join instead of returning a partial spectrum.
+
+```@docs
+compute_detailed_spectrum
+FieldID
+Sector
+FieldLocalization
+DetailedField
+DetailedSpectrum
+```
 
 ## Finding fields
 
@@ -90,19 +110,6 @@ VEV, coupling, or mass-matrix results. Its scope is one model and backend field
 basis; the computation context planned for later phases will carry that scope
 as provenance.
 
-## Spectrum API
-
 ```@docs
-compute_gauge_group
-compute_spectrum
-compute_detailed_spectrum
 find_fields
-GaugeGroup
-SpectrumField
-Spectrum
-FieldID
-Sector
-FieldLocalization
-DetailedField
-DetailedSpectrum
 ```

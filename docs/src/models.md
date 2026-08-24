@@ -44,6 +44,11 @@ print(model_file_text(model))
 This is useful when comparing a Julia model with an upstream `begin model ...
 end model` block.
 
+```@docs
+OrbifolderModel
+model_file_text
+```
+
 ## Point-group twists
 
 The point group acts on the compact dimensions through one or two twist
@@ -56,6 +61,11 @@ twist.vectors
 
 [`Twist`](@ref) contains one four-dimensional rational vector for a cyclic
 point group and two for a product point group.
+
+```@docs
+compute_twist
+Twist
+```
 
 ## Gauge embedding
 
@@ -77,15 +87,9 @@ metadata in Julia, and an invalid embedding may be rejected before a result is
 printed. Use [Consistency and Batch Workflows](@ref) to distinguish a model
 rejection from an execution failure.
 
-## Model and geometry API
-
 ```@docs
-OrbifolderModel
-model_file_text
-compute_twist
 compute_shift_vectors
 compute_wilson_lines
-Twist
 ShiftVector
 WilsonLine
 WilsonLines

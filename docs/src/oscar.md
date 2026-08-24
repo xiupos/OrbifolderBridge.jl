@@ -24,6 +24,11 @@ root_systems = gauge_group_root_systems(spectrum.gauge_group)
 then constructs one `Oscar.RootSystem` per non-abelian factor, preserving the
 order used by `SpectrumField.rep`.
 
+```@docs
+algebra_to_cartan_type
+gauge_group_root_systems
+```
+
 ## Representations as highest weights
 
 ```julia
@@ -46,11 +51,7 @@ OSCAR/GAP-backed construction should remain sequential even if spectra were
 computed concurrently. See [Consistency and Batch Workflows](@ref) for the
 process/parse boundary used by batch APIs.
 
-## OSCAR mapping API
-
 ```@docs
-algebra_to_cartan_type
-gauge_group_root_systems
 representation_weight
 field_weights
 find_weight_of_dimension

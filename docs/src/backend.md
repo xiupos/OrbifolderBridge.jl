@@ -52,14 +52,19 @@ It hides the different SUSY and non-SUSY batch protocols, applies a timeout,
 stages Geometry data, and returns the raw transcript. It deliberately does not
 expose the upstream prompt as a Julia session API.
 
+```@docs
+run_orbifolder_script
+run_capture
+```
+
+## Parsing transcripts
+
 [`split_transcript`](@ref) separates the response by echoed command and
 [`output_for`](@ref) selects one command's output. The `parse_*` functions turn
 captured output into plain Julia values. They are useful when developing a new
 typed operation; ordinary callers should prefer `compute_*`.
 
 ```@docs
-run_orbifolder_script
-run_capture
 split_transcript
 output_for
 parse_rational
