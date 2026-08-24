@@ -229,47 +229,66 @@ function _run_model_script(model::OrbifolderModel, commands::Vector{<:AbstractSt
 end
 
 """
-    compute_gauge_group(model::OrbifolderModel; timeout = 120) -> GaugeGroup
+    compute_gauge_group(model::OrbifolderModel[, config]; timeout = 120) -> GaugeGroup
 
 Run `model` through the `orbifolder`/`nonSUSYorbifolder` backend and parse
-its four-dimensional gauge group in the backend's default vev-configuration
-(`"TestConfig1"`; switching vev-configurations is not yet supported, see
-`docs/src/upstream_notes.md`).
+its four-dimensional gauge group. Pass a [`VEVConfigurationRef`](@ref) as
+`config` to select it explicitly. Omitting `config` preserves the legacy
+behavior of using the backend's initially selected configuration.
 """
-function compute_gauge_group(model::OrbifolderModel; timeout::Real = 120)
-    out = _run_model_script(model, ["cd gauge group", "print gauge group"]; timeout = timeout)
+function compute_gauge_group(
+    model::OrbifolderModel,
+    config::Union{Nothing,VEVConfigurationRef} = nothing;
+    timeout::Real = 120,
+)
+    commands = _configuration_commands(config, ["cd gauge group", "print gauge group"])
+    out = _run_model_script(model, commands; timeout = timeout)
+    _validate_configuration_selection(out, config)
     return parse_gauge_group(output_for(split_transcript(out), "print gauge group"))
 end
 
 """
-    compute_spectrum(model::OrbifolderModel; timeout = 120) -> Spectrum
+    compute_spectrum(model::OrbifolderModel[, config]; timeout = 120) -> Spectrum
 
 Run `model` through the `orbifolder`/`nonSUSYorbifolder` backend and parse
-its massless spectrum in the backend's default vev-configuration
-(`"TestConfig1"`; switching vev-configurations is not yet supported, see
-`docs/src/upstream_notes.md`).
+its massless spectrum. Pass a [`VEVConfigurationRef`](@ref) to make the
+configuration selection explicit; omission retains the legacy backend-default
+behavior.
 """
-function compute_spectrum(model::OrbifolderModel; timeout::Real = 120)
-    out = _run_model_script(model, ["cd spectrum", "print summary"]; timeout = timeout)
+function compute_spectrum(
+    model::OrbifolderModel,
+    config::Union{Nothing,VEVConfigurationRef} = nothing;
+    timeout::Real = 120,
+)
+    commands = _configuration_commands(config, ["cd spectrum", "print summary"])
+    out = _run_model_script(model, commands; timeout = timeout)
+    _validate_configuration_selection(out, config)
     return parse_spectrum(output_for(split_transcript(out), "print summary"))
 end
 
 """
-    compute_detailed_spectrum(model::OrbifolderModel; timeout = 120) -> DetailedSpectrum
+    compute_detailed_spectrum(model::OrbifolderModel[, config]; timeout = 120) -> DetailedSpectrum
 
 Run one backend session and obtain both the grouped spectrum and individually
 identified fields, including sectors, constructing elements, localization,
 discrete charges, R charges, and multiplet types where upstream exposes them.
-Field labels refer to the backend's default vev-configuration.
+Field labels refer to the explicitly selected `config`, or to the backend's
+initial selection when it is omitted for backwards compatibility.
 """
-function compute_detailed_spectrum(model::OrbifolderModel; timeout::Real = 120)
-    commands = [
+function compute_detailed_spectrum(
+    model::OrbifolderModel,
+    config::Union{Nothing,VEVConfigurationRef} = nothing;
+    timeout::Real = 120,
+)
+    commands = _configuration_commands(config, [
         "cd spectrum",
         "print summary",
         "print(*) with internal information",
         "print summary of fixed points with labels",
-    ]
-    pairs = split_transcript(_run_model_script(model, commands; timeout = timeout))
+    ])
+    output = _run_model_script(model, commands; timeout = timeout)
+    _validate_configuration_selection(output, config)
+    pairs = split_transcript(output)
     return parse_detailed_spectrum(
         output_for(pairs, "print summary"),
         output_for(pairs, "print(*) with internal information"),

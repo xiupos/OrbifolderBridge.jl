@@ -18,6 +18,7 @@ makedocs(;
             "Overview" => "tutorial.md",
             "Models and Geometry" => "models.md",
             "Spectra and Fields" => "spectra.md",
+            "VEV Configurations" => "vev_configurations.md",
             "Model Classification and Generation" => "generation.md",
             "OSCAR Integration" => "oscar.md",
             "Consistency and Batch Workflows" => "batch.md",

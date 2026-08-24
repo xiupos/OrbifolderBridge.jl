@@ -14,7 +14,8 @@ The examples on this page use `model` from [A first model](@ref).
 ## Gauge group
 
 ```julia
-group = compute_gauge_group(model)
+config = VEVConfigurationRef("TestConfig1")
+group = compute_gauge_group(model, config)
 group.nonabelian
 group.n_u1
 ```
@@ -31,7 +32,7 @@ GaugeGroup
 ## Grouped spectrum
 
 ```julia
-spectrum = compute_spectrum(model)
+spectrum = compute_spectrum(model, config)
 
 for field in spectrum.fields
     println(field.multiplicity, " × ", field.rep, "_", field.statistic,
@@ -57,7 +58,7 @@ Spectrum
 ## Individual fields
 
 ```julia
-detailed = compute_detailed_spectrum(model)
+detailed = compute_detailed_spectrum(model, config)
 
 length(detailed.fields) ==
     sum(row.multiplicity for row in detailed.summary.fields)

@@ -71,12 +71,12 @@ scoring, ranking, and landscape-search policy remain outside its scope.
 
 ## Phase 4: VEV configurations
 
-- [ ] **`[upstream]`** List available VEV configurations.
-- [ ] **`[bridge]`** Select a configuration explicitly in configuration-dependent APIs.
+- [x] **`[upstream]`** List available VEV configurations.
+- [x] **`[bridge]`** Select a configuration explicitly in configuration-dependent APIs.
 - [ ] **`[upstream]`** Read field labels and VEV assignments from a configuration.
-- [ ] **`[upstream]`** Read observable and hidden gauge-sector selections.
+- [x] **`[upstream]`** Read observable and hidden gauge-sector selections.
 - [ ] **`[upstream]`** Obtain the unbroken gauge group and spectrum after VEV assignment.
-- [ ] **`[upstream]`** Expose the SM-, Pati–Salam-, and SU(5)-type analysis of
+- [x] **`[upstream]`** Expose the SM-, Pati–Salam-, and SU(5)-type analysis of
       an existing VEV configuration.
 - [ ] **`[bridge]`** Add non-interactive creation or modification only where it can be made
       declarative and reproducible.
