@@ -81,6 +81,12 @@ end
             detailed = compute_detailed_spectrum(m)
             @test length(detailed.fields) == sum(f.multiplicity for f in spec.fields)
             @test detailed.summary == spec
+            configs = list_vev_configurations(m)
+            @test getfield.(getfield.(configs, :configuration), :label) ==
+                  ["StandardConfig1", "TestConfig1"]
+            explicit = VEVConfigurationRef("StandardConfig1")
+            @test compute_spectrum(m, explicit).gauge_group.config_label == "StandardConfig1"
+            @test compute_gauge_sector(m, explicit).gauge_group.config_label == "StandardConfig1"
         end
     end
 
@@ -102,6 +108,13 @@ end
             detailed = compute_detailed_spectrum(m)
             @test length(detailed.fields) == sum(f.multiplicity for f in spec.fields)
             @test detailed.summary == spec
+            configs = list_vev_configurations(m)
+            @test getfield.(getfield.(configs, :configuration), :label) ==
+                  ["StandardConfig1", "TestConfig1"]
+            explicit = VEVConfigurationRef("StandardConfig1")
+            @test compute_gauge_group(m, explicit).config_label == "StandardConfig1"
+            @test compute_detailed_spectrum(m, explicit).summary.gauge_group.config_label ==
+                  "StandardConfig1"
         end
     end
 end

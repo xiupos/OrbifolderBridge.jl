@@ -9,7 +9,7 @@ const _CLASS_CONFIG_PREFIX = Dict(
 """
     ModelClassification
 
-Result of upstream's SM, Pati–Salam, and SU(5) analysis of the default VEV
+Result of upstream's SM, Pati–Salam, and SU(5) analysis of a VEV
 configuration. `classes` contains the recognized model classes and
 `configurations` maps each class to the configuration labels created by
 upstream. The requested `generations` includes upstream's vector-like-exotics
@@ -157,34 +157,45 @@ function _classification_from_output(
 end
 
 """
-    classify_model(model::OrbifolderModel; generations::Integer = 3, timeout = 120)
+    classify_model(model; config = nothing, generations = 3, timeout = 120)
 
-Ask upstream to classify the model's default VEV configuration as SM,
-Pati–Salam, or SU(5), including its net-generation and vector-like-exotics
-predicate.
+Ask upstream to classify a VEV configuration as SM, Pati–Salam, or SU(5),
+including its net-generation and vector-like-exotics predicate. Pass an
+explicit [`VEVConfigurationRef`](@ref) for reproducible selection; `nothing`
+retains the legacy backend-default behavior.
 """
 function classify_model(
     model::OrbifolderModel;
+    config::Union{Nothing,VEVConfigurationRef} = nothing,
     generations::Integer = 3,
     timeout::Real = 120,
 )
     generations >= 0 || throw(ArgumentError("generations must be nonnegative"))
     info = backend_info(model.mode; timeout = min(timeout, 30))
     command = "analyze config $(Int(generations))generations"
-    output = _run_model_script(model, ["cd vev-config", command]; timeout = timeout)
+    commands = config === nothing ? ["cd vev-config", command] :
+               ["cd vev-config", _use_configuration_command(config), command]
+    output = _run_model_script(model, commands; timeout = timeout)
+    _validate_configuration_selection(output, config)
     block = output_for(split_transcript(output), command)
     return _classification_from_output(block, Int(generations), info)
 end
 
 """
-    compute_anomaly_report(model::OrbifolderModel; timeout = 120) -> AnomalyReport
+    compute_anomaly_report(model; config = nothing, timeout = 120) -> AnomalyReport
 
-Return the anomaly diagnostics computed by upstream for the default VEV
-configuration.
+Return the anomaly diagnostics computed by upstream for the selected VEV
+configuration. `config = nothing` retains the legacy backend-default behavior.
 """
-function compute_anomaly_report(model::OrbifolderModel; timeout::Real = 120)
+function compute_anomaly_report(
+    model::OrbifolderModel;
+    config::Union{Nothing,VEVConfigurationRef} = nothing,
+    timeout::Real = 120,
+)
     info = backend_info(model.mode; timeout = min(timeout, 30))
-    output = _run_model_script(model, ["cd gauge group", "print anomaly info"]; timeout = timeout)
+    commands = _configuration_commands(config, ["cd gauge group", "print anomaly info"])
+    output = _run_model_script(model, commands; timeout = timeout)
+    _validate_configuration_selection(output, config)
     block = output_for(split_transcript(output), "print anomaly info")
     return _anomaly_report_from_output(block, info)
 end

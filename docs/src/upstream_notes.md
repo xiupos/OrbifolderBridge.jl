@@ -193,6 +193,30 @@ completes before the isolated working directory is collected. The model-file
 parser applies the mode-specific shift count and accepts only zero-valued
 trailing vectors beyond the required data.
 
+## VEV configurations
+
+Both supported backends accept the same read-only configuration protocol:
+
+```text
+cd vev-config
+print configs
+use config(StandardConfig1)
+print gauge group
+```
+
+`print configs` marks the current configuration with `->` and reports the
+active/available field-label scheme. SUSY 1.2.1 additionally prints a `fields
+with VEV` column; non-SUSY 1.0 omits that column when empty. `print gauge
+group` encloses hidden factors in brackets after an observable-sector choice.
+The bridge fixtures preserve both formats.
+
+The mutable command tree advertises `create config`, `select observable
+sector`, `vev(fields)`, and, in SUSY 1.2.1, `find unbroken gauge group`.
+Spacing and backend availability differ for these operations, and numerical
+VEV values are absent from `print configs`. Until successful fixed-VEV
+assignment is fixture-tested in both backends, mutation remains in the
+raw-command escape hatch instead of a partially reliable typed API.
+
 ## Couplings (`cd couplings`) — explored but not yet parsed
 
 A `couplings` subdirectory exists in the command tree but ships no `.man`

@@ -13,7 +13,7 @@ function _parse_gauge_group_factors(factors_str::AbstractString)
     nonabelian = String[]
     n_u1 = 0
     for block in split(factors_str, " and ")
-        block = strip(block)
+        block = strip(replace(block, '[' => "", ']' => ""))
         if startswith(block, "U(1)")
             m = match(r"^U\(1\)\^(\d+)$", block)
             if m !== nothing

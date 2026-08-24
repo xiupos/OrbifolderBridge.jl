@@ -73,6 +73,17 @@ Read-only selection and inspection should precede configuration mutation.
 Mutation, when added, should use immutable or copy-on-write Julia descriptions
 that can be serialized and reproduced.
 
+Read-only selection is implemented by [`VEVConfigurationRef`](@ref). Every
+explicit configuration-dependent operation selects that reference in a fresh
+isolated process and verifies upstream's acknowledgement. Legacy overloads
+without a reference remain for compatibility, but reproducible code should not
+depend on the initially selected `TestConfig1`. [`GaugeSector`](@ref) records
+observable and hidden factor indices separately from algebra names.
+
+`print configs` exposes field labels that carry VEVs but not their numerical
+assignments. Typed mutation and full assignment inspection therefore remain
+deferred until a stable non-interactive grammar has been fixture-tested.
+
 ### Gauge and representation data
 
 Gauge data should retain exact information whenever upstream makes it

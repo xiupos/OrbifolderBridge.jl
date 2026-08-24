@@ -11,11 +11,12 @@ not reproduce upstream's spectrum predicates or selection rules.
 
 ## Classifying a model
 
-[`classify_model`](@ref) asks upstream to analyze the default VEV
-configuration for Standard Model, Pati–Salam, and SU(5) realizations:
+[`classify_model`](@ref) asks upstream to analyze a VEV configuration for
+Standard Model, Pati–Salam, and SU(5) realizations:
 
 ```julia
-classification = classify_model(model; generations = 3)
+config = VEVConfigurationRef("TestConfig1")
+classification = classify_model(model; config = config, generations = 3)
 :sm in classification.classes
 get(classification.configurations, :sm, String[])
 ```
@@ -23,9 +24,9 @@ get(classification.configurations, :sm, String[])
 The generation count is not a dimension-based Julia heuristic. Upstream
 computes the net number of generations and applies its vector-like-exotics
 condition. Successful classifications create configuration labels such as
-`SMConfig1`; later configuration APIs will make those configurations directly
-selectable. The result records the detected backend and transcript block; an
-empty `classes` vector is a valid negative classification.
+`SMConfig1`, which can be passed to the APIs described in
+[VEV Configurations](@ref). The result records the detected backend and
+transcript block; an empty `classes` vector is a valid negative classification.
 
 ```@docs
 ModelClassification
@@ -38,7 +39,7 @@ classify_model
 retains its full diagnostic:
 
 ```julia
-anomalies = compute_anomaly_report(model)
+anomalies = compute_anomaly_report(model; config = config)
 anomalies.universal
 ```
 

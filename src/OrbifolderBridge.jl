@@ -11,6 +11,9 @@ export run_orbifolder_script
 export split_transcript, output_for, parse_rational, parse_rational_vector
 export GaugeGroup, SpectrumField, Spectrum, FieldID, Sector, FieldLocalization
 export DetailedField, DetailedSpectrum, Twist, ShiftVector, WilsonLine, WilsonLines
+export VEVConfigurationRef, VEVConfigurationSummary, GaugeSector
+export VEVConfigurationError, parse_vev_configurations, parse_gauge_sector
+export list_vev_configurations, compute_gauge_sector
 export parse_gauge_group, parse_spectrum, parse_detailed_spectrum, find_fields
 export parse_twist, parse_shift_vectors, parse_wilson_lines
 export algebra_to_cartan_type
@@ -36,6 +39,7 @@ include("core/transcript.jl")
 include("core/types.jl")
 include("core/parsers.jl")
 include("core/model.jl")
+include("core/configuration.jl")
 include("core/consistency.jl")
 include("core/generation.jl")
 

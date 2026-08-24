@@ -137,8 +137,8 @@ presenting the related public API.
 
 ## Known limitations
 
-- Only the default vev-configuration (`"TestConfig1"`) is supported; switching
-  vev-configurations is not yet implemented.
+- VEV configurations can be listed and selected explicitly, but typed
+  configuration creation and numerical VEV assignment are not yet supported.
 - Allowed superpotential couplings (`cd couplings`) are not yet parsed — the command protocol
   was explored but not fully worked out.
 - [`find_weight_of_dimension`](@ref) resolves a representation's printed *dimension* to a
