@@ -54,6 +54,77 @@ struct Spectrum
 end
 
 """
+    FieldID
+
+Stable identity of an individual upstream field. `number` is the zero-based
+`field no.` reported by `print(fields) with internal information`; unlike a
+display label, it does not depend on the selected label scheme. A `FieldID` is
+scoped to one orbifold model and backend field basis.
+"""
+struct FieldID
+    number::Int
+end
+
+"""
+    Sector
+
+Untwisted or twisted sector coordinates exactly as reported by the backend.
+SUSY orbifolder uses two coordinates `(k,l)`, while nonSUSYorbifolder uses
+three `(k,m,n)` coordinates (including its Witten-twist coordinate).
+"""
+struct Sector
+    coordinates::Vector{Int}
+end
+
+"""
+    FieldLocalization
+
+Localization of an individual field at an upstream fixed point or fixed
+brane. `translation` is the six-component translational part of its
+constructing element, and `local_shift` is the reported 16-dimensional
+`V_loc`. `label` is upstream's fixed-point label, such as `"T54"` or `"U"`.
+"""
+struct FieldLocalization
+    label::String
+    translation::Vector{Rational{Int}}
+    local_shift::Vector{Rational{Int}}
+end
+
+"""
+    DetailedField
+
+One individually identified massless field. Gauge quantum numbers use the
+same conventions as [`SpectrumField`](@ref). `label` is configuration-dependent
+metadata; cross-references should use `id`. `space_group_charges`, `r_charges`,
+and `right_moving_momentum` are populated when upstream prints them.
+"""
+struct DetailedField
+    id::FieldID
+    label::String
+    rep::Vector{Int}
+    statistic::Symbol
+    charges::Vector{Rational{Int}}
+    multiplet_type::Symbol
+    sector::Sector
+    constructing_translation::Vector{Rational{Int}}
+    localization::Union{Nothing,FieldLocalization}
+    space_group_charges::Vector{Rational{Int}}
+    r_charges::Vector{Rational{Int}}
+    right_moving_momentum::Vector{Rational{Int}}
+end
+
+"""
+    DetailedSpectrum
+
+Both views of a massless spectrum: `summary` preserves upstream grouping and
+multiplicities, while `fields` contains one [`DetailedField`](@ref) per state.
+"""
+struct DetailedSpectrum
+    summary::Spectrum
+    fields::Vector{DetailedField}
+end
+
+"""
     Twist
 
 The twist vector(s) \$v_1\$ (and \$v_2\$, for \$\\mathbb{Z}_M \\times \\mathbb{Z}_N\$
@@ -105,7 +176,10 @@ end
 # These are plain value types (parsed data, not identity-bearing objects), so
 # equality/hashing should be structural rather than Julia's default identity
 # fallback for non-isbits structs.
-for T in (:GaugeGroup, :SpectrumField, :Spectrum, :Twist, :ShiftVector, :WilsonLine, :WilsonLines)
+for T in (
+    :GaugeGroup, :SpectrumField, :Spectrum, :FieldID, :Sector, :FieldLocalization,
+    :DetailedField, :DetailedSpectrum, :Twist, :ShiftVector, :WilsonLine, :WilsonLines,
+)
     @eval begin
         Base.:(==)(a::$T, b::$T) = all(getfield(a, f) == getfield(b, f) for f in fieldnames($T))
         Base.hash(a::$T, h::UInt) = hash(ntuple(i -> getfield(a, i), fieldcount($T)), hash($T, h))

@@ -14,14 +14,14 @@ live in [`docs/src/upstream_notes.md`](docs/src/upstream_notes.md).
 
 ## Phase 1: Field identity and detailed spectra
 
-- [ ] Parse upstream field labels such as `F_1`.
-- [ ] Represent individual fields without losing summary multiplicities.
-- [ ] Define stable field identifiers shared by all later APIs.
-- [ ] Parse twisted sectors and untwisted-sector information.
-- [ ] Parse fixed-point or fixed-brane localization.
-- [ ] Parse constructing elements and local shifts where upstream exposes them.
-- [ ] Parse discrete charges, R charges, and multiplet types.
-- [ ] Provide structured field queries by representation, charge, sector,
+- [x] Parse upstream field labels such as `F_1`.
+- [x] Represent individual fields without losing summary multiplicities.
+- [x] Define stable field identifiers shared by all later APIs.
+- [x] Parse twisted sectors and untwisted-sector information.
+- [x] Parse fixed-point or fixed-brane localization.
+- [x] Parse constructing elements and local shifts where upstream exposes them.
+- [x] Parse discrete charges, R charges, and multiplet types.
+- [x] Provide structured field queries by representation, charge, sector,
       statistic, and label.
 
 ## Phase 2: Backend discovery and compatibility

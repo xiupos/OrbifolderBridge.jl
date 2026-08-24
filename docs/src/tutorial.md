@@ -167,6 +167,37 @@ scalars is a twisted-sector state — the large multiplicities and denominators 
 bigger models come directly from counting inequivalent fixed points per twisted sector, per
 the massless-state analysis summarized above.
 
+### Individual fields and localization
+
+Use [`compute_detailed_spectrum`](@ref) when field-level identity matters:
+
+```julia
+detailed = compute_detailed_spectrum(model)
+length(detailed.fields) == sum(f.multiplicity for f in detailed.summary.fields)
+
+s1 = only(find_fields(detailed; label = "s_1"))
+s1.id                         # FieldID(6), independent of the display-label scheme
+s1.sector                     # Sector([0, 0, 0])
+s1.localization.label         # "U"
+s1.localization.local_shift   # 16D V_loc reported by upstream
+```
+
+Each [`DetailedField`](@ref) also retains its constructing-element translation,
+right-moving momentum, multiplet type, and any discrete space-group or R charges
+printed by the model's Geometry data. Queries combine predicates:
+
+```julia
+twisted_fermions = find_fields(detailed;
+    sector = (0, 2, 0),
+    statistic = :f,
+    charge = 1 => 12,
+)
+```
+
+Use `FieldID` for later VEV, coupling, and mass-matrix references. Labels such
+as `s_1` and `F_1` remain useful for display and upstream commands, but can
+change with the selected vev-configuration's label scheme.
+
 ## Mapping onto genuine OSCAR objects
 
 The `rep` and `charges` above are just parsed text. [`gauge_group_root_systems`](@ref) and

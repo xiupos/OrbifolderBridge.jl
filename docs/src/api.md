@@ -27,6 +27,7 @@ Single-model, sequential:
 
 ```@docs
 compute_spectrum
+compute_detailed_spectrum
 compute_gauge_group
 compute_twist
 compute_shift_vectors
@@ -49,6 +50,11 @@ compute_wilson_lines_batch
 GaugeGroup
 SpectrumField
 Spectrum
+FieldID
+Sector
+FieldLocalization
+DetailedField
+DetailedSpectrum
 Twist
 ShiftVector
 WilsonLine
@@ -86,6 +92,8 @@ parse_rational
 parse_rational_vector
 parse_gauge_group
 parse_spectrum
+parse_detailed_spectrum
+find_fields
 parse_twist
 parse_shift_vectors
 parse_wilson_lines

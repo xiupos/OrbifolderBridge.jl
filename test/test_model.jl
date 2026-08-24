@@ -80,6 +80,9 @@ end
             @test compute_twist(m).vectors == [[0 // 1, 1 // 3, 1 // 3, -2 // 3]]
             @test compute_wilson_lines(m).orders == [3, 3, 3, 3, 3, 3]
             @test length(compute_shift_vectors(m)) == 1
+            detailed = compute_detailed_spectrum(m)
+            @test length(detailed.fields) == sum(f.multiplicity for f in spec.fields)
+            @test detailed.summary == spec
         end
     end
 
@@ -98,6 +101,9 @@ end
             wl = compute_wilson_lines(m)
             @test wl.identifications == [("W_1", "W_2"), ("W_3", "W_4"), ("W_5", "W_6")]
             @test compute_twist(m).vectors == [[0 // 1, 0 // 1, 1 // 3, -1 // 3], [0 // 1, 1 // 3, 0 // 1, -1 // 3]]
+            detailed = compute_detailed_spectrum(m)
+            @test length(detailed.fields) == sum(f.multiplicity for f in spec.fields)
+            @test detailed.summary == spec
         end
     end
 end

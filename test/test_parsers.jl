@@ -97,6 +97,66 @@ end
     @test spec.fields[end].statistic == :f
 end
 
+@testset "parse_detailed_spectrum and field queries" begin
+    @test_throws ErrorException OrbifolderBridge._parse_field_details("no fields")
+    cases = [
+        ("nonsusy", "z3_1_1_detailed.txt", 205, 1, "s_1", FieldID(6), Sector([0, 0, 0])),
+        ("susy", "mssm0_detailed.txt", 254, 9, "F_1", FieldID(11), Sector([0, 0])),
+    ]
+    for (mode, file, count, n_u1, first_label, first_id, first_sector) in cases
+        pairs = split_transcript(read(joinpath(@__DIR__, "fixtures", mode, file), String))
+        detailed = parse_detailed_spectrum(
+            output_for(pairs, "print summary"),
+            output_for(pairs, "print(*) with internal information"),
+            output_for(pairs, "print summary of fixed points with labels"),
+        )
+        @test length(detailed.fields) == count == sum(f.multiplicity for f in detailed.summary.fields)
+        @test detailed.summary.gauge_group.n_u1 == n_u1
+        @test length(unique(f.id for f in detailed.fields)) == count
+        @test length(unique(f.label for f in detailed.fields)) == count
+        @test all(f.localization !== nothing for f in detailed.fields)
+        @test all(f.localization.translation == f.constructing_translation for f in detailed.fields)
+        @test all(length(f.localization.local_shift) == 16 for f in detailed.fields)
+
+        first_field = only(find_fields(detailed; label = first_label))
+        @test first_field.id == first_id
+        @test first_field.sector == first_sector
+        @test only(find_fields(detailed; representation = first_field.rep, charges = first_field.charges,
+            sector = first_sector, label = first_label)) == first_field
+        @test first_field in find_fields(detailed; charge = 1 => first_field.charges[1])
+        @test isempty(find_fields(detailed; label = "not_a_field"))
+    end
+
+    susy_pairs = split_transcript(read(joinpath(@__DIR__, "fixtures", "susy", "mssm0_detailed.txt"), String))
+    susy = parse_detailed_spectrum(
+        output_for(susy_pairs, "print summary"),
+        output_for(susy_pairs, "print(*) with internal information"),
+        output_for(susy_pairs, "print summary of fixed points with labels"),
+    )
+    @test all(f.multiplet_type == :left_chiral for f in susy.fields)
+    @test all(length(f.space_group_charges) == 5 for f in susy.fields)
+    @test all(isempty(f.r_charges) for f in susy.fields) # this Geometry exposes no discrete R symmetry
+
+    field_output = output_for(susy_pairs, "print(*) with internal information")
+    @test_throws ErrorException OrbifolderBridge._parse_field_details(replace(field_output, "field no." => "field index"; count = 1))
+
+    optional_charges = """
+        gauge boson: A_1
+      sector (k,l)        : (1, 2)
+      fixed point n_a     : (0, 1/2, 0, 0, 0, 0)
+      space group charges : (1/3, 2/3)
+      representation      : ( 8)_v  U(1): ()
+      right-moving q_sh   : (0, 1, 0, 0)
+      R charges           : (1/3, -1/3)
+      field no.           : 42
+    """
+    charged = only(OrbifolderBridge._parse_field_details(optional_charges))
+    @test charged.multiplet_type == :gauge_boson
+    @test charged.constructing_translation == [0, 1 // 2, 0, 0, 0, 0]
+    @test charged.space_group_charges == [1 // 3, 2 // 3]
+    @test charged.r_charges == [1 // 3, -1 // 3]
+end
+
 @testset "parse_twist" begin
     t1 = parse_twist(output_for(
         split_transcript(read(joinpath(@__DIR__, "fixtures", "nonsusy", "z3_1_1_summary.txt"), String)),

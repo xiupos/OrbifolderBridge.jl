@@ -48,6 +48,13 @@ A detailed spectrum should preserve both grouped and individual views:
 - labels are configuration-dependent metadata, not the primary identity;
 - sector and localization data belong to the individual state.
 
+The implemented [`FieldID`](@ref) wraps upstream's zero-based `field no.`,
+which is independent of the selected display-label scheme. Its stability scope
+is one model and backend field basis; provenance added in Phase 8 will identify
+that scope across serialized analyses. [`DetailedSpectrum`](@ref) carries the
+existing grouped [`Spectrum`](@ref) alongside individually identified
+[`DetailedField`](@ref)s, so no multiplicity information is discarded.
+
 This design prevents multiplicity expansion, relabeling, or a configuration
 change from breaking references held by coupling and mass-matrix results.
 
