@@ -14,9 +14,15 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
-        "Tutorial" => "tutorial.md",
+        "User Guide" => [
+            "Overview" => "tutorial.md",
+            "Models and Geometry" => "models.md",
+            "Spectra and Fields" => "spectra.md",
+            "OSCAR Integration" => "oscar.md",
+            "Consistency and Batch Workflows" => "batch.md",
+        ],
+        "Backend Configuration" => "backend.md",
         "Design and Scope" => "design.md",
-        "API Reference" => "api.md",
         "Upstream Notes" => "upstream_notes.md",
     ],
 )
