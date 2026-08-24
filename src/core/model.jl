@@ -138,6 +138,29 @@ function compute_spectrum(model::OrbifolderModel; timeout::Real = 120)
 end
 
 """
+    compute_detailed_spectrum(model::OrbifolderModel; timeout = 120) -> DetailedSpectrum
+
+Run one backend session and obtain both the grouped spectrum and individually
+identified fields, including sectors, constructing elements, localization,
+discrete charges, R charges, and multiplet types where upstream exposes them.
+Field labels refer to the backend's default vev-configuration.
+"""
+function compute_detailed_spectrum(model::OrbifolderModel; timeout::Real = 120)
+    commands = [
+        "cd spectrum",
+        "print summary",
+        "print(*) with internal information",
+        "print summary of fixed points with labels",
+    ]
+    pairs = split_transcript(_run_model_script(model, commands; timeout = timeout))
+    return parse_detailed_spectrum(
+        output_for(pairs, "print summary"),
+        output_for(pairs, "print(*) with internal information"),
+        output_for(pairs, "print summary of fixed points with labels"),
+    )
+end
+
+"""
     compute_twist(model::OrbifolderModel; timeout = 120) -> Twist
 
 Run `model` through the backend and parse its point-group twist vector(s).

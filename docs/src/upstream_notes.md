@@ -129,8 +129,31 @@ exit                          # requires interactive "yes" confirmation
 T(k,m,n)`, `of fixed points`, `no U1s`. With `with labels`, each spectrum row
 gets one field label per copy appended after the charges (e.g. `F_1`, or for
 a multiplicity-9 row, nine space-separated labels `F_18 F_20 F_22 ...`) —
-useful for cross-referencing `couplings` output against `Spectrum` rows, not
-yet implemented in the Julia parser.
+useful for cross-referencing `couplings` output against individual fields.
+
+Phase 1 uses two additional spectrum commands, verified against orbifolder
+1.2.1 and nonSUSYorbifolder commit
+`c917adea59b788872ac00bc41239dd791afc4ff1` for the 2026-08-24 fixtures:
+
+```
+print(*) with internal information
+print summary of fixed points with labels
+```
+
+The first prints one block per individual field. In both backends it includes
+the active field label, the constructing-element sector and six translation
+coefficients, representation and U(1) charges, right-moving momentum,
+`internalIndex`, and a zero-based `field no.`. The latter is independent of the
+active display-label scheme and is used as `FieldID`. SUSY output uses sector
+coordinates `(k,l)`; non-SUSY output uses `(k,m,n)`. Depending on the Geometry
+file, the field block also prints `space group charges` and `R charges`.
+
+The fixed-point summary supplies a fixed-point/fixed-brane label, constructing
+translation, 16D `V_loc`, and the field labels at that localization. Joining it
+to the individual blocks by field label gives localization while retaining the
+backend field number as identity. The parser verifies that the translation
+agrees on both sides and that individual fields reproduce every grouped
+summary multiplicity.
 
 ## Couplings (`cd couplings`) — explored but not yet parsed
 
