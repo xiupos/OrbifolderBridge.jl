@@ -1,0 +1,4 @@
+  U(1)_i - U(1)_i - U(1)_i anomalies:
+    tr Q_1 = 1/1
+
+  Anomalies are not universal, i.e. their ratios are not OK.

@@ -1,0 +1,8 @@
+  SU(N)^3 anomaly:
+    2-th gauge group factor A2: tr cubic    = 0/1
+
+  U(1)_i - U(1)_i - U(1)_i, U(1)_i - U(1)_j - U(1)_j and U(1)_i - grav. - grav. anomalies:
+    tr Q_1       = 20736/1
+    tr Q_1^3     = 8957952/1
+
+  All anomalies are universal, i.e. their ratios are OK.

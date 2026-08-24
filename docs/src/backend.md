@@ -61,6 +61,10 @@ supports(info, :detailed_spectrum)       # true
 supports(info, :effective_couplings)     # false in the current bridge
 ```
 
+The capability set also records backend-specific differences. In particular,
+`:coupling_refined_inequivalence` is available for SUSY 1.2.1 but not
+non-SUSY 1.0.
+
 For setup diagnostics, [`check_backend`](@ref) catches configuration,
 execution, timeout, and compatibility failures and returns a
 [`BackendSelfTest`](@ref). A false result carries a human-readable `message`

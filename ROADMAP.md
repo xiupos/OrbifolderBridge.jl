@@ -47,22 +47,22 @@ status of OrbifolderBridge.
 
 ## Phase 3: Upstream model generation and classification
 
-- [ ] **`[upstream]`** Expose random model generation from an existing model,
+- [x] **`[upstream]`** Expose random model generation from an existing model,
       with declarative selection of inherited and randomized shifts and Wilson
       lines.
-- [ ] **`[upstream]`** Expose the SM-, Pati–Salam-, and SU(5)-type
+- [x] **`[upstream]`** Expose the SM-, Pati–Salam-, and SU(5)-type
       classifications provided by upstream.
-- [ ] **`[upstream]`** Support the upstream net-generation filter, including
+- [x] **`[upstream]`** Support the upstream net-generation filter, including
       its vector-like-exotics condition.
-- [ ] **`[upstream]`** Expose upstream's spectrum-based selection of
+- [x] **`[upstream]`** Expose upstream's spectrum-based selection of
       inequivalent candidate models.
-- [ ] **`[upstream]`** Support refinement of candidate comparison by the number
+- [x] **`[upstream]`** Support refinement of candidate comparison by the number
       of couplings through a specified order.
-- [ ] **`[upstream]`** Expose anomaly checking and its diagnostics during model
+- [x] **`[upstream]`** Expose anomaly checking and its diagnostics during model
       generation and analysis.
-- [ ] **`[bridge]`** Return generated models, rejection reasons, classification
+- [x] **`[bridge]`** Return generated models, rejection reasons, classification
       results, and provenance as typed Julia values.
-- [ ] **`[investigate]`** Establish which generation, classification,
+- [x] **`[investigate]`** Establish which generation, classification,
       inequivalence, and anomaly options have equivalent semantics in the SUSY
       and non-SUSY backends.
 

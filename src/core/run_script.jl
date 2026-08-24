@@ -1,28 +1,11 @@
-"""
-    _run_orbifolder_script(mode::Symbol, commands::Vector{<:AbstractString};
-                           files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
-                           timeout::Real = 120) -> String
-
-Run a list of CPrompt `commands` against the `orbifolder` (`mode = :susy`) or
-`nonSUSYorbifolder` (`mode = :nonsusy`) binary and return the raw text
-transcript for the `parse_*` functions in `src/core/parsers.jl` to consume.
-
-Each call gets its own `mktempdir()`, so concurrent calls never share files
-(see `parallel.jl`). `files` are extra inputs (e.g. `"model.txt" => ...`)
-written into that directory before the binary runs; `Geometry/` is staged
-automatically via [`orbifolder_geometry_dir`](@ref).
-
-The two backends are driven differently (see `docs/src/upstream_notes.md`):
-`nonSUSYorbifolder` has a documented `script <file>` CLI mode that writes its
-transcript to `result_<file>`; `orbifolder` has no CLI batch mode, so commands
-are instead fed via `load program(<file>)` over stdin, followed by a `yes` to
-confirm the trailing `exit` command (the quit confirmation reads raw stdin,
-not the command file) and its transcript is read back from stdout.
-"""
-function _run_orbifolder_script(
+# Internal execution primitive. Each call stages inputs and Geometry in an
+# isolated temporary directory, normalizes the two backend batch protocols,
+# and reads requested output artifacts before cleanup.
+function _run_orbifolder_script_artifacts(
     mode::Symbol,
     commands::Vector{<:AbstractString};
     files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
+    collect_files::Vector{<:AbstractString} = String[],
     timeout::Real = 120,
 )
     _check_mode(mode)
@@ -43,15 +26,39 @@ function _run_orbifolder_script(
             result_file = joinpath(dir, "result_$command_file")
             isfile(result_file) ||
                 error("nonSUSYorbifolder script mode did not produce $result_file")
-            return read(result_file, String)
+            output = read(result_file, String)
         else
-            return run_capture(
+            output = run_capture(
                 Cmd(`$binary`; dir = dir);
                 input = "load program($command_file)\nyes\n",
                 timeout = timeout,
             )
         end
+
+        artifacts = Dict{String,String}()
+        for name in collect_files
+            basename(name) == name || throw(ArgumentError("artifact name must be a basename, got $name"))
+            path = joinpath(dir, name)
+            isfile(path) && (artifacts[String(name)] = read(path, String))
+        end
+        return (; output, files = artifacts)
     end
+end
+
+
+function _run_orbifolder_script(
+    mode::Symbol,
+    commands::Vector{<:AbstractString};
+    files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
+    timeout::Real = 120,
+)
+    result = _run_orbifolder_script_artifacts(
+        mode,
+        commands;
+        files = files,
+        timeout = timeout,
+    )
+    return result.output
 end
 
 """

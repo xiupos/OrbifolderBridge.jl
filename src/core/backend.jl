@@ -7,10 +7,14 @@ const _BACKEND_CAPABILITIES = Dict(
     (:susy, v"1.2.1") => (
         :consistency, :gauge_group, :spectrum, :detailed_spectrum,
         :twist, :shift_vectors, :wilson_lines, :raw_commands,
+        :model_generation, :model_classification, :inequivalent_models,
+        :coupling_refined_inequivalence, :anomaly_check,
     ),
     (:nonsusy, v"1.0.0") => (
         :consistency, :gauge_group, :spectrum, :detailed_spectrum,
         :twist, :shift_vectors, :wilson_lines, :raw_commands,
+        :model_generation, :model_classification, :inequivalent_models,
+        :anomaly_check,
     ),
 )
 

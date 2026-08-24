@@ -17,6 +17,10 @@ export algebra_to_cartan_type
 export dual_weight, find_weight_of_dimension, representation_weight
 export gauge_group_root_systems, field_weights
 export OrbifolderModel, model_file_text
+export UpstreamModelParseError, parse_orbifolder_models
+export ModelClassification, AnomalyReport, GenerationDiagnostic
+export ModelGenerationRequest, ModelGenerationResult
+export classify_model, compute_anomaly_report, generate_models, select_inequivalent_models
 export ConsistencyResult, check_consistency, is_consistent
 export check_consistency_batch, partition_consistent_models
 export compute_gauge_group, compute_spectrum, compute_detailed_spectrum
@@ -33,6 +37,7 @@ include("core/types.jl")
 include("core/parsers.jl")
 include("core/model.jl")
 include("core/consistency.jl")
+include("core/generation.jl")
 
 include("oscar/cartan_type.jl")
 include("oscar/representations.jl")
