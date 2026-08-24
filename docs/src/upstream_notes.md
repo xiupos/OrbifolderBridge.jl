@@ -216,6 +216,10 @@ representations and U(1) charge vectors), `print twist`, `print shift`,
 
 ## Follow-up procedure for upstream version bumps
 
+The checked-in parser fixtures currently target `orbifolder` 1.2.1 and
+`nonSUSYorbifolder` 1.0. These are also the only versions accepted by the
+runtime compatibility table.
+
 1. Re-run `autoreconf -fi && ./configure && make` (nonSUSYorbifolder) or just
    `./configure && make` (orbifolder) against the new tarball/checkout; diff
    `cprompt.cpp`'s `command_names_*` tables against the previous version to
@@ -224,3 +228,5 @@ representations and U(1) charge vectors), `print twist`, `print shift`,
    `test/fixtures/` to catch output-format drift before it breaks the parser.
 3. Check `ChangeLog`/`AUTHORS` and the paper version referenced in `main.cpp`'s
    startup banner for the new version string.
+4. Add the new version to the compatibility table only after all SUSY or
+   non-SUSY parser fixtures and real-backend smoke tests pass.

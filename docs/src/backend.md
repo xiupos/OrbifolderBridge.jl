@@ -23,14 +23,62 @@ environment variables, then Preferences.jl settings, then documented path
 fallbacks.
 
 The binary and Geometry directory must belong to a compatible upstream tree.
-Automatic version/capability validation is planned but not yet part of the
-public API.
+[`backend_info`](@ref) validates both paths, runs the backend through its real
+isolated batch protocol, and reads the kind and version from the startup
+banner:
+
+```julia
+info = backend_info(:susy)
+info.kind       # :susy
+info.version    # v"1.2.1"
+```
+
+OrbifolderBridge currently supports `orbifolder` 1.2.1 and
+`nonSUSYorbifolder` 1.0. Unknown kinds and versions raise
+[`BackendCompatibilityError`](@ref) instead of allowing a parser to return
+partial data. Every typed computation and raw script performs this preflight
+check.
 
 ```@docs
 orbifolder_binary
 set_orbifolder_binary!
 orbifolder_geometry_dir
 set_orbifolder_geometry_dir!
+BackendInfo
+BackendCompatibilityError
+backend_info
+```
+
+## Capabilities and self-test
+
+Capabilities describe operations supported by the bridge for the detected
+kind/version pair. They are symbols intended for feature checks rather than
+version comparisons:
+
+```julia
+info = backend_info(:nonsusy)
+supports(info, :detailed_spectrum)       # true
+supports(info, :effective_couplings)     # false in the current bridge
+```
+
+For setup diagnostics, [`check_backend`](@ref) catches configuration,
+execution, timeout, and compatibility failures and returns a
+[`BackendSelfTest`](@ref). A false result carries a human-readable `message`
+and any output captured before the failure:
+
+```julia
+result = check_backend(:susy)
+result.ok || @warn result.message
+```
+
+This check is deliberately lightweight: it verifies the executable, requires
+a nonempty Geometry-file inventory, and completes the backend's normal script
+protocol without loading a physical model.
+
+```@docs
+supports
+BackendSelfTest
+check_backend
 ```
 
 ## Raw command scripts
@@ -79,10 +127,10 @@ parse_wilson_lines
 
 ## Process errors
 
-Backend timeouts and nonzero exits have distinct exception types. Parser
-errors indicate that a successful process did not produce the supported
-grammar; detailed-spectrum errors retain the relevant raw output block in the
-diagnostic.
+Backend timeouts, nonzero exits, and compatibility failures have distinct
+exception types. Parser errors indicate that a supported backend did not
+produce the expected grammar; detailed-spectrum errors retain the relevant
+raw output block in the diagnostic.
 
 ```@docs
 OrbifolderProcessError

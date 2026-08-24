@@ -119,10 +119,12 @@ info = backend_info(:nonsusy)
 supports(info, :effective_couplings)
 ```
 
-An unknown output format must cause a diagnostic failure rather than silent
-partial parsing. Fixtures should identify the backend and version that produced
-them. SUSY and non-SUSY fixtures should be separate whenever their command
-protocol or output grammar differs.
+The compatibility table currently recognizes SUSY 1.2.1 and non-SUSY 1.0.
+Every public operation performs a preflight through the backend's actual batch
+protocol before its transcript is parsed. An unknown kind or version causes a
+diagnostic failure rather than silent partial parsing. Fixtures identify the
+backend and version that produced them, and SUSY and non-SUSY fixtures remain
+separate whenever their command protocol or output grammar differs.
 
 ## Reproducibility and provenance
 
