@@ -1,9 +1,10 @@
 const _GAUGE_GROUP_HEADER_RE =
     r"Gauge group in vev-configuration \"([^\"]*)\":\s*(.*)$"m
 const _ANOMALOUS_RE = r"anomalous with tr Q_anom\s*=\s*([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)"
-const _SUMMARY_ROW_RE = r"^\s*(\d+)\s*\(([^)]*)\)_(\w+)\s+U\(1\)\s*:\s*\(([^)]*)\)\s*$"
+const _SUMMARY_ROW_RE =
+    r"^\s*(\d+)\s*\(([^)]*)\)_(\w+)(?:\s+U\(1\)\s*:\s*\(([^)]*)\))?\s*$"
 const _LABELED_SUMMARY_ROW_RE =
-    r"^\s*(\d+)\s*\(([^)]*)\)_(\w+)\s+U\(1\)\s*:\s*\(([^)]*)\)\s+(.+?)\s*$"
+    r"^\s*(\d+)\s*\(([^)]*)\)_(\w+)(?:\s+U\(1\)\s*:\s*\(([^)]*)\))?\s+(.+?)\s*$"
 const _TWIST_ROW_RE = r"^\s*v_(\d+)\s*=\s*\(([^)]*)\)\s*$"
 const _VECTOR16_ROW_RE = r"^\s*(\w+)\s*=\s*\(([^)]*)\),\s*\(([^)]*)\)\s*$"
 const _WL_IDENTIFICATIONS_RE = r"^\s*(W_\d+)\s*=\s*(W_\d+)\s*$"
@@ -62,7 +63,8 @@ function parse_spectrum(output::AbstractString)
         multiplicity = parse(Int, m.captures[1])
         rep = [parse(Int, strip(tok)) for tok in split(m.captures[2], ',')]
         statistic = Symbol(m.captures[3])
-        charges = parse_rational_vector(m.captures[4])
+        charges = m.captures[4] === nothing ? Rational{Int}[] :
+                  parse_rational_vector(m.captures[4])
         push!(fields, SpectrumField(multiplicity, rep, statistic, charges))
     end
     return Spectrum(gauge_group, anomalous_tr_q, fields)
@@ -74,7 +76,7 @@ const _FIELD_NUMBER_RE = r"(?m)^\s*field no\.\s*:\s*(\d+)\s*$"
 const _DETAIL_SECTOR_RE = r"(?m)^\s*sector \([^)]*\)\s*:\s*\(([^)]*)\)\s*$"
 const _DETAIL_TRANSLATION_RE = r"(?m)^\s*fixed point n_a\s*:\s*\(([^)]*)\)\s*$"
 const _DETAIL_REP_RE =
-    r"(?m)^\s*(?:rep\. in config|representation)\s*:\s*\(([^)]*)\)_(\w+)\s+U\(1\)\s*:\s*\(([^)]*)\)"
+    r"(?m)^\s*(?:rep\. in config|representation)\s*:\s*\(([^)]*)\)_(\w+)(?:\s+U\(1\)\s*:\s*\(([^)]*)\))?\s*$"
 const _DETAIL_SPACE_GROUP_CHARGES_RE = r"(?m)^\s*space group charges\s*:\s*\(([^)]*)\)\s*$"
 const _DETAIL_R_CHARGES_RE = r"(?m)^\s*R charges\s*:\s*\(([^)]*)\)\s*$"
 const _DETAIL_RIGHT_MOVER_RE = r"(?m)^\s*right-moving q_sh\s*:\s*\(([^)]*)\)\s*$"
@@ -107,7 +109,8 @@ function _parse_field_details(output::AbstractString)
         rep_match = _required_match(_DETAIL_REP_RE, block, "representation")
         rep = _parse_int_vector(rep_match.captures[1])
         statistic = Symbol(rep_match.captures[2])
-        charges = parse_rational_vector(rep_match.captures[3])
+        charges = rep_match.captures[3] === nothing ? Rational{Int}[] :
+                  parse_rational_vector(rep_match.captures[3])
         sg_match = match(_DETAIL_SPACE_GROUP_CHARGES_RE, block)
         r_match = match(_DETAIL_R_CHARGES_RE, block)
         q_match = match(_DETAIL_RIGHT_MOVER_RE, block)

@@ -73,12 +73,14 @@ scoring, ranking, and landscape-search policy remain outside its scope.
 
 - [x] **`[upstream]`** List available VEV configurations.
 - [x] **`[bridge]`** Select a configuration explicitly in configuration-dependent APIs.
-- [ ] **`[upstream]`** Read field labels and VEV assignments from a configuration.
+- [x] **`[upstream]`** Read field labels and VEV assignments from a configuration
+      where SUSY orbifolder exposes numerical VEVs.
 - [x] **`[upstream]`** Read observable and hidden gauge-sector selections.
-- [ ] **`[upstream]`** Obtain the unbroken gauge group and spectrum after VEV assignment.
+- [x] **`[upstream]`** Obtain the unbroken gauge group and spectrum after VEV assignment
+      with the SUSY backend.
 - [x] **`[upstream]`** Expose the SM-, Pati–Salam-, and SU(5)-type analysis of
       an existing VEV configuration.
-- [ ] **`[bridge]`** Add non-interactive creation or modification only where it can be made
+- [x] **`[bridge]`** Add non-interactive creation or modification only where it can be made
       declarative and reproducible.
 
 ## Phase 5: Exact gauge and representation data

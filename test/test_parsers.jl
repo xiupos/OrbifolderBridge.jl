@@ -97,6 +97,16 @@ end
     @test spec.fields[end].statistic == :f
 end
 
+@testset "parse spectrum after hiding all U(1) factors" begin
+    text = read(joinpath(@__DIR__, "fixtures", "nonsusy", "derived_summary.txt"), String)
+    spectrum = parse_spectrum(text)
+    @test spectrum.gauge_group == GaugeGroup("BridgeConfig1", ["SO(10)", "SO(16)"], 0)
+    @test spectrum.fields == [
+        SpectrumField(36, [10, 1], :s, Rational{Int}[]),
+        SpectrumField(3, [1, 1], :s, Rational{Int}[]),
+    ]
+end
+
 @testset "parse_detailed_spectrum and field queries" begin
     @test_throws ErrorException OrbifolderBridge._parse_field_details("no fields")
     cases = [

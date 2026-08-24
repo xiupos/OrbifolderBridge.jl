@@ -93,10 +93,83 @@ parse_gauge_sector
 GaugeSector
 ```
 
-## Current mutation boundary
+## Building a derived configuration
 
-Configuration creation, numerical VEV assignment, and recomputation of the
-unbroken gauge group remain available through [`run_orbifolder_script`](@ref)
-while their reproducible typed protocol is investigated. In particular,
-upstream's random VEV option has no controllable seed and is unsuitable as a
-default high-level operation.
+A [`VEVConfigurationSpec`](@ref) describes how to reconstruct a derived
+configuration in every isolated upstream process:
+
+```julia
+spec = VEVConfigurationSpec(
+    name = "VisibleConfig1",
+    base = standard,
+    observable_nonabelian = [1, 2],
+    observable_u1 = [1],
+)
+
+result = materialize_vev_configuration(model, spec)
+result.gauge_sector
+result.spectrum
+```
+
+`nothing` preserves the base observable-sector choice, while an empty vector
+selects no factors of that kind. Factor indices are checked against the base
+configuration before mutation. The requested name must not collide with a
+configuration created when the model is loaded.
+
+A spec may be passed anywhere a derived configuration must be replayed:
+
+```julia
+compute_spectrum(model, spec)
+compute_gauge_group(model, spec)
+classify_model(model; config = spec)
+compute_anomaly_report(model; config = spec)
+```
+
+If the spec hides a non-abelian factor, upstream folds that factor's
+representation dimension into grouped multiplicities. There is then no
+unambiguous one-to-one detailed spectrum, so
+`result.detailed_spectrum === nothing` and `compute_detailed_spectrum` rejects
+the request instead of returning misleading field multiplicities.
+
+```@docs
+VEVConfigurationSpec
+VEVConfigurationResult
+materialize_vev_configuration
+```
+
+## Assigning fixed VEVs
+
+SUSY orbifolder 1.2.1 supports deterministic fixed VEV assignments and
+unbroken gauge-group recomputation. In the following example, `susy_model` is
+an [`OrbifolderModel`](@ref) with `mode = :susy`:
+
+```julia
+vev_spec = VEVConfigurationSpec(
+    name = "SingletVEV1",
+    base = VEVConfigurationRef("TestConfig1"),
+    assignments = [VEVAssignment(FieldID(11), 1.0)],
+)
+
+vacuum = materialize_vev_configuration(susy_model, vev_spec)
+vacuum.assignments
+vacuum.gauge_sector
+vacuum.spectrum
+```
+
+The bridge first resolves each stable `FieldID` to the active label in the
+base configuration, then creates the derived configuration, assigns fixed
+values, asks upstream to identify the unbroken group, and reads the VEVs back
+from internal field information. Both upstream transcripts are retained.
+
+Upstream exposes no weight-component selector, so the typed API initially
+accepts only fields that are singlets under every non-abelian factor. Random
+VEVs are deliberately excluded because upstream provides no controllable
+seed. nonSUSYorbifolder supports configuration derivation and observable
+sector selection but rejects nonempty VEV assignments and unbroken-group
+recomputation through typed capability checks.
+
+```@docs
+VEVAssignment
+FieldVEV
+parse_field_vevs
+```

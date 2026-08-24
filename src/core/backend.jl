@@ -9,12 +9,13 @@ const _BACKEND_CAPABILITIES = Dict(
         :twist, :shift_vectors, :wilson_lines, :raw_commands,
         :model_generation, :model_classification, :inequivalent_models,
         :coupling_refined_inequivalence, :anomaly_check, :vev_configurations,
+        :vev_configuration_mutation, :field_vevs, :unbroken_gauge_group,
     ),
     (:nonsusy, v"1.0.0") => (
         :consistency, :gauge_group, :spectrum, :detailed_spectrum,
         :twist, :shift_vectors, :wilson_lines, :raw_commands,
         :model_generation, :model_classification, :inequivalent_models,
-        :anomaly_check, :vev_configurations,
+        :anomaly_check, :vev_configurations, :vev_configuration_mutation,
     ),
 )
 

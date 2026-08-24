@@ -87,6 +87,24 @@ end
             explicit = VEVConfigurationRef("StandardConfig1")
             @test compute_spectrum(m, explicit).gauge_group.config_label == "StandardConfig1"
             @test compute_gauge_sector(m, explicit).gauge_group.config_label == "StandardConfig1"
+            spec = VEVConfigurationSpec(;
+                name = "BridgeConfig1",
+                observable_nonabelian = [1, 3],
+                observable_u1 = Int[],
+            )
+            materialized = materialize_vev_configuration(m, spec)
+            @test materialized.configuration.configuration.label == "BridgeConfig1"
+            @test materialized.gauge_sector.observable_nonabelian == [1, 3]
+            @test isempty(materialized.gauge_sector.observable_u1)
+            @test isempty(materialized.assignments)
+            @test isnothing(materialized.detailed_spectrum)
+            @test_throws ArgumentError materialize_vev_configuration(
+                m,
+                VEVConfigurationSpec(;
+                    name = "UnsupportedVEV1",
+                    assignments = [VEVAssignment(FieldID(9), 1)],
+                ),
+            )
         end
     end
 
@@ -115,6 +133,15 @@ end
             @test compute_gauge_group(m, explicit).config_label == "StandardConfig1"
             @test compute_detailed_spectrum(m, explicit).summary.gauge_group.config_label ==
                   "StandardConfig1"
+            spec = VEVConfigurationSpec(;
+                name = "BridgeConfig1",
+                assignments = [VEVAssignment(FieldID(11), 1)],
+            )
+            materialized = materialize_vev_configuration(m, spec)
+            @test materialized.configuration.fields_with_vev == ["F_1"]
+            @test materialized.assignments == [FieldVEV(FieldID(11), "F_1", 1.0)]
+            @test materialized.spectrum.gauge_group.config_label == "BridgeConfig1"
+            @test materialized.gauge_sector.hidden_u1 == collect(2:9)
         end
     end
 end

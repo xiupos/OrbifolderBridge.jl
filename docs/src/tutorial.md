@@ -106,7 +106,8 @@ in reconstructing a highest weight from a printed representation dimension.
   anomaly diagnostics, random candidates, and inequivalence.
 - [OSCAR Integration](@ref): root systems, weights, and dual representations.
 - [Consistency and Batch Workflows](@ref): validation and concurrent scans.
-- [VEV Configurations](@ref): explicit selection and observable/hidden sectors.
+- [VEV Configurations](@ref): explicit selection, replayable derived
+  configurations, fixed SUSY VEVs, and observable/hidden sectors.
 - [Backend Configuration](@ref): binary discovery, low-level execution,
   parsers, and diagnostics.
 - [Design and Scope](@ref): architectural boundaries and future API direction.

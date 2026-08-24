@@ -25,11 +25,68 @@ _configuration_fixture(parts...) = joinpath(@__DIR__, "fixtures", parts...)
     selected = only(filter(c -> c.selected, parse_vev_configurations(with_vevs)))
     @test selected.label_count == 2
     @test selected.fields_with_vev == ["F_1", "F_7"]
+
+    assignment_text = read(_configuration_fixture("susy", "vev_assignment.txt"), String)
+    assigned_config = only(filter(
+        c -> c.selected,
+        parse_vev_configurations(output_for(split_transcript(assignment_text), "print configs")),
+    ))
+    @test assigned_config.fields_with_vev == ["F_1"]
+    continued = replace(
+        assignment_text,
+        "<F_1>" => "<F_1> <F_2> <F_3> <F_4> <F_5> <F_6> <F_7> <F_8> <F_9> <F_10>\n" *
+                   "                         |               | <F_11> <F_12>",
+    )
+    continued_config = only(filter(
+        c -> c.selected,
+        parse_vev_configurations(output_for(split_transcript(continued), "print configs")),
+    ))
+    @test continued_config.fields_with_vev == ["F_$i" for i in 1:12]
     @test_throws ErrorException parse_vev_configurations("no table")
     @test_throws ErrorException parse_vev_configurations(replace(
         read(_configuration_fixture("nonsusy", "vev_configs.txt"), String),
         "->" => "  ",
     ))
+end
+
+@testset "declarative VEV configuration specifications" begin
+    assignment = VEVAssignment(FieldID(11), 1)
+    @test assignment.value === 1.0
+    @test_throws ArgumentError VEVAssignment(FieldID(11), Inf)
+
+    spec = VEVConfigurationSpec(;
+        name = "BridgeConfig1",
+        base = VEVConfigurationRef("TestConfig1"),
+        observable_nonabelian = [1, 2],
+        observable_u1 = Int[],
+        assignments = [assignment],
+    )
+    @test spec.recompute_unbroken_group
+    @test OrbifolderBridge._observable_sector_command(spec) ==
+          "select observable sector: gauge group(1,2) no U1s"
+    @test_throws ArgumentError VEVConfigurationSpec(
+        name = "Bad1", observable_nonabelian = [1, 1],
+    )
+    @test_throws ArgumentError VEVConfigurationSpec(
+        name = "Bad1", observable_u1 = [0],
+    )
+    @test_throws ArgumentError VEVConfigurationSpec(
+        name = "Bad1", assignments = [assignment, assignment],
+    )
+
+    preserve = VEVConfigurationSpec(name = "Preserve1")
+    @test isnothing(OrbifolderBridge._observable_sector_command(preserve))
+    @test !preserve.recompute_unbroken_group
+
+    output = read(_configuration_fixture("susy", "vev_assignment.txt"), String)
+    vevs = parse_field_vevs(output_for(
+        split_transcript(output), "print(F_1) with internal information",
+    ))
+    @test vevs == [FieldVEV(FieldID(11), "F_1", 1.0)]
+    @test isempty(parse_field_vevs(replace(
+        output_for(split_transcript(output), "print(F_1) with internal information"),
+        r"(?m)^\s*vev\s*:.*$" => "",
+    )))
 end
 
 @testset "observable and hidden gauge sectors" begin

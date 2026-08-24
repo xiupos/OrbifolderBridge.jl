@@ -210,12 +210,31 @@ with VEV` column; non-SUSY 1.0 omits that column when empty. `print gauge
 group` encloses hidden factors in brackets after an observable-sector choice.
 The bridge fixtures preserve both formats.
 
-The mutable command tree advertises `create config`, `select observable
-sector`, `vev(fields)`, and, in SUSY 1.2.1, `find unbroken gauge group`.
-Spacing and backend availability differ for these operations, and numerical
-VEV values are absent from `print configs`. Until successful fixed-VEV
-assignment is fixture-tested in both backends, mutation remains in the
-raw-command escape hatch instead of a partially reliable typed API.
+Both backends implement `create config(...) from(...)` and `select observable
+sector: ...`. These operations are replayed from a
+`VEVConfigurationSpec` because an upstream configuration exists only for the
+lifetime of one process.
+
+SUSY 1.2.1 additionally implements:
+
+```text
+vev(F_1)=1.0
+find unbroken gauge group
+print(*) with internal information
+```
+
+Whitespace between the closing parenthesis and `=` makes the VEV command
+unrecognized. Successful assignment prints `Vev of field "F_1" set to 1.00`,
+`print configs` lists `<F_1>`, and internal field output contains `vev :
+1.00`. The command always writes component zero of the field's left-moving
+weight vector; no component selector is exposed. non-SUSY 1.0 implements
+neither VEV assignment nor unbroken-group recomputation.
+
+After a non-abelian factor is hidden, upstream omits that factor from the
+spectrum representation and multiplies the row multiplicity by its printed
+dimension. Individual field numbers no longer reproduce those projected
+multiplicities one-for-one. The bridge retains the grouped spectrum but does
+not construct a misleading detailed spectrum for that case.
 
 ## Couplings (`cd couplings`) — explored but not yet parsed
 
