@@ -130,9 +130,10 @@ models = [OrbifolderModel(; mode = :nonsusy, label = "M$i", point_group = "Z3_1_
 spectra = compute_spectra(models; ntasks = 8)  # asyncmap over subprocess launches; parsing is sequential
 ```
 
-See the [Tutorial](@ref) for a deeper walkthrough grounded in the underlying physics (twist
-vectors, shift embeddings, modular invariance, and how to read the spectrum output), and the
-[API Reference](@ref) for the full list of exported functions and types.
+Start with the [Overview](@ref), then use the task-oriented guide pages for
+[Models and Geometry](@ref), [Spectra and Fields](@ref), [OSCAR Integration](@ref), and
+[Consistency and Batch Workflows](@ref). Each page explains its concepts and workflow before
+presenting the related public API.
 
 ## Known limitations
 

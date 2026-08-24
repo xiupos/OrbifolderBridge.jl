@@ -37,10 +37,12 @@ Construct an [`OrbifolderModel`](@ref).
 - `point_group`: the name of a shipped space-group file, e.g. `"Z3_1_1"` or
   `"Z3xZ3_1_1"`, resolved to `Geometry/Geometry_<point_group>.txt` in
   [`orbifolder_geometry_dir`](@ref)`(mode)`
-- `shift`: either a single 16-entry vector \$V_1\$ (for \$\\mathbb{Z}_M\$ point
-  groups), or a pair `(V_1, V_2)` of 16-entry vectors (for \$\\mathbb{Z}_M
-  \\times \\mathbb{Z}_N\$ point groups); the unused second shift defaults to
-  zero
+- `shift`: for `mode = :susy`, either a single 16-entry vector \$V_1\$ (for a
+  \$\\mathbb{Z}_M\$ point group) or a pair `(V_1, V_2)` (for
+  \$\\mathbb{Z}_M \\times \\mathbb{Z}_N\$). For `mode = :nonsusy`, the pair
+  follows upstream's two shift slots: the Witten \$\\mathbb{Z}_2\$ embedding
+  followed by the compactification point-group embedding. A single vector
+  fills the first slot and leaves the second zero.
 - `lattice`: `:E8xE8` or `:Spin32` (the \$E_8 \\times E_8\$ or
   \$\\mathrm{Spin}(32)/\\mathbb{Z}_2\$ ten-dimensional gauge lattice)
 - `wilson_lines`: up to six 16-entry vectors \$W_1,\\dots,W_6\$; defaults to
