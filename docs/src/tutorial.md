@@ -228,8 +228,36 @@ models = [
     OrbifolderModel(; mode = :nonsusy, label = "M$i", point_group = "Z3_1_1", shift = shift_i)
     for (i, shift_i) in enumerate(candidate_shifts)
 ]
-spectra = compute_spectra(models; ntasks = 8)
 ```
+
+Candidate shifts and Wilson lines should be checked by the backend before the more expensive
+spectrum calculation. The check loads each model and reads its shift vectors back; it does
+not compute the spectrum:
+
+```julia
+results = check_consistency_batch(
+    models;
+    ntasks = min(8, Sys.CPU_THREADS),
+)
+
+valid_models = [
+    model
+    for (model, result) in zip(models, results)
+    if result.valid
+]
+
+spectra = compute_spectra(
+    valid_models;
+    ntasks = min(8, Sys.CPU_THREADS),
+)
+```
+
+An invalid result retains both a reason in `result.message` and the raw backend
+transcript in `result.output`. Missing binaries or Geometry directories,
+timeouts, process crashes, and unexpected transcript changes are exceptions;
+they are not converted to `valid = false`. [`partition_consistent_models`](@ref)
+provides the same filtering as an input-order-preserving named tuple when both
+the valid and invalid subsets are needed.
 
 This is the pattern to reach for when scanning many shift-vector/Wilson-line choices for
 phenomenologically interesting spectra, à la the "Mini-Landscape" studies referenced in the
