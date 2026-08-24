@@ -1,0 +1,6 @@
+> load orbifolds(model_M.txt)
+  Load orbifolds from file "model_M.txt".
+> cd M
+/M> cd model
+/M/model> print shift
+  No vectors were printed.

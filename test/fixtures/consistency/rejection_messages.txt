@@ -1,0 +1,7 @@
+modular invariance failed|Warning: problems with modular invariance.
+Wilson-line relations are not fulfilled|Cannot load model from file: Relations between Wilson lines not fulfilled.
+shift or Wilson-line data could not be loaded|Warning: cannot load shifts or Wilsonlines. Return false.
+space group is ill-defined or incompatible|Cannot load model from file: Space group ill-defined.
+space-group geometry is corrupt or incompatible|Warning: geometry-file "Geometry_bad.txt" is corrupt. Return false.
+orbifold group is ill-defined|Warning: Orbifold group ill-defined.
+model label was not loaded by the backend|Orbifold "Missing" not known.

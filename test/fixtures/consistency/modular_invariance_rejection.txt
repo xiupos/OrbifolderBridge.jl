@@ -1,0 +1,9 @@
+> load orbifolds(model_Bad.txt)
+  3 (V_1^2 - v_1^2) = 2/3 = 0 mod 2 failed!
+  Warning in bool COrbifold::Create() : Modular invariance failed. Return false.
+> cd Bad
+  Orbifold "Bad" not known.
+> cd model
+  Unknown command.
+> print shift
+  Unknown command.

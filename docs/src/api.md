@@ -13,6 +13,16 @@ model_file_text
 
 ## Computing model data
 
+Consistency checking:
+
+```@docs
+ConsistencyResult
+check_consistency
+is_consistent
+check_consistency_batch
+partition_consistent_models
+```
+
 Single-model, sequential:
 
 ```@docs
