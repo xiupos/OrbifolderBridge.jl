@@ -89,9 +89,20 @@ scoring, ranking, and landscape-search policy remain outside its scope.
 - [ ] **`[upstream]`** Parse U(1) generators and their normalization.
 - [ ] **`[upstream]`** Parse the anomalous U(1) generator and anomaly data.
 - [ ] **`[bridge]`** Represent observable and hidden gauge factors explicitly.
+- [ ] **`[bridge]`** Construct OSCAR root and weight lattices from exact upstream
+      data, retaining their embedding in the 16-dimensional gauge lattice.
+- [ ] **`[bridge]`** Represent U(1) generators, their Gram matrix, and their
+      normalization as exact OSCAR rational matrices.
 - [ ] **`[investigate]`** Obtain exact Dynkin labels or highest weights when upstream provides
       them.
+- [ ] **`[bridge]`** Convert exact Dynkin labels or highest weights to OSCAR
+      `WeightLatticeElem` values associated with the corresponding gauge factor.
 - [ ] **`[bridge]`** Reduce reliance on dimension-based representation inference.
+- [ ] **`[bridge]`** Validate reported representation dimensions against exact
+      highest weights, while keeping dimension-based lookup an explicit fallback.
+- [ ] **`[bridge]`** Compare the exact gauge embeddings before and after a VEV
+      configuration, including surviving roots and U(1) directions, without
+      recomputing the upstream Higgsing decision.
 
 ## Phase 6: Couplings and superpotential
 
@@ -102,8 +113,15 @@ scoring, ranking, and landscape-search policy remain outside its scope.
 - [ ] **`[upstream]`** Parse effective couplings after VEV substitution.
 - [ ] **`[upstream]`** Represent or exclude couplings that vanish by symmetry as reported by
       upstream.
+- [ ] **`[bridge]`** Construct an OSCAR polynomial ring whose generators map
+      bijectively to stable field identifiers, and convert parsed couplings to
+      elements of that ring.
+- [ ] **`[bridge]`** Express VEV substitution as an exact ring homomorphism while
+      retaining the source coupling and field provenance.
 
-The bridge will not reimplement upstream selection rules in Julia.
+The bridge will not reimplement upstream selection rules or flatness algorithms
+in Julia. It exposes the upstream superpotential as OSCAR data so users can
+perform their own subsequent ideal-theoretic analysis.
 
 ## Phase 7: Mass matrices
 
@@ -111,6 +129,11 @@ The bridge will not reimplement upstream selection rules in Julia.
 - [ ] **`[bridge]`** Parse matrix entries and connect them to fields and couplings.
 - [ ] **`[upstream]`** Support effective matrices after VEV substitution.
 - [ ] **`[bridge]`** Convert symbolic results to suitable OSCAR polynomial rings and matrices.
+- [ ] **`[bridge]`** Attach stable field identifiers to matrix rows and columns
+      and retain the coupling provenance of every entry.
+- [ ] **`[bridge]`** Support exact specialization of polynomial mass matrices at
+      a selected VEV configuration, leaving rank, minor, and determinantal-ideal
+      analysis available through OSCAR.
 
 ## Phase 8: Geometry and localization
 
