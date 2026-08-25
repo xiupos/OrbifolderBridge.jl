@@ -116,17 +116,28 @@ scoring, ranking, and landscape-search policy remain outside its scope.
 
 ## Phase 6: Couplings and superpotential
 
-- [ ] **`[investigate]`** Establish and fixture-test the non-interactive coupling protocol.
-- [ ] **`[upstream]`** Generate allowed couplings through upstream.
-- [ ] **`[bridge]`** Parse superpotential terms into structured field references.
-- [ ] **`[upstream]`** Support coupling searches and maximum-order restrictions.
-- [ ] **`[upstream]`** Parse effective couplings after VEV substitution.
-- [ ] **`[upstream]`** Represent or exclude couplings that vanish by symmetry as reported by
-      upstream.
-- [ ] **`[bridge]`** Construct an OSCAR polynomial ring whose generators map
+- [x] **`[investigate]`** Establish and fixture-test the non-interactive coupling protocol.
+      SUSY 1.2.1 requires `create coupling(...)`, `wait(1)`, then
+      `save couplings(...)`; non-SUSY 1.0 has no coupling implementation.
+- [x] **`[upstream]`** Generate explicitly requested allowed couplings through
+      SUSY upstream.
+- [x] **`[bridge]`** Parse saved superpotential terms into structured stable
+      field references after exact model-header validation.
+- [x] **`[upstream]`** Support searches over explicitly registered coupling
+      candidates and maximum-order restrictions. The bridge submits only
+      candidates through the requested order because SUSY 1.2.1's documented
+      save-file order option parses the wrong command parameter.
+- [x] **`[upstream]`** Parse effective couplings after VEV substitution,
+      retaining both dynamical and VEV field identities and the ordinary
+      source term.
+- [x] **`[upstream]`** Represent or exclude couplings that vanish by symmetry as reported by
+      upstream. The available command may require an interactive `y/n`
+      classification and is intentionally excluded from the batch API rather
+      than replacing that physical decision in Julia.
+- [x] **`[bridge]`** Construct an OSCAR polynomial ring whose generators map
       bijectively to stable field identifiers, and convert parsed couplings to
       elements of that ring.
-- [ ] **`[bridge]`** Express VEV substitution as an exact ring homomorphism while
+- [x] **`[bridge]`** Express VEV substitution as an exact ring homomorphism while
       retaining the source coupling and field provenance.
 
 The bridge will not reimplement upstream selection rules or flatness algorithms

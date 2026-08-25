@@ -140,8 +140,10 @@ presenting the related public API.
 - Derived configurations and observable sectors are replayable on both
   backends; fixed VEV assignment and unbroken-group recomputation are
   available only with SUSY orbifolder.
-- Allowed superpotential couplings (`cd couplings`) are not yet parsed — the command protocol
-  was explored but not fully worked out.
+- Explicitly requested ordinary superpotential couplings are available with
+  SUSY orbifolder. The supported non-SUSY backend has no coupling engine;
+  ordinary/effective coupling parsing and OSCAR polynomial conversion are
+  therefore SUSY-only capabilities.
 - [`find_weight_of_dimension`](@ref) resolves a representation's printed *dimension* to a
   weight via a bounded search over small Dynkin-label combinations. This covers every
   representation that actually appears in these models' output (fundamentals, adjoints,

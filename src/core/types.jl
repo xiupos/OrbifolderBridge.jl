@@ -356,3 +356,138 @@ end
 
 Base.showerror(io::IO, e::VEVConfigurationError) =
     print(io, "VEVConfigurationError: ", e.message)
+
+"""
+    CouplingRequest(fields; allowed_fields = nothing)
+
+A request for upstream to test and register one coupling monomial. `fields`
+contains the stable identities of its factors and must have order at least
+three. `allowed_fields`, when present, restricts the fields upstream may use
+while applying its coupling-selection rules.
+"""
+struct CouplingRequest
+    fields::Vector{FieldID}
+    allowed_fields::Union{Nothing,Vector{FieldID}}
+end
+@structural_equality CouplingRequest
+
+function CouplingRequest(
+    fields::AbstractVector{FieldID};
+    allowed_fields::Union{Nothing,AbstractVector{FieldID}} = nothing,
+)
+    length(fields) >= 3 || throw(ArgumentError("a coupling request must have order at least 3"))
+    allowed = allowed_fields === nothing ? nothing : collect(allowed_fields)
+    allowed === nothing || allunique(allowed) ||
+        throw(ArgumentError("allowed_fields must not contain duplicates"))
+    return CouplingRequest(collect(fields), allowed)
+end
+
+"""
+    CouplingTerm
+
+One coupling accepted by upstream. `fields` preserves the upstream factor
+order and refers only to stable [`FieldID`](@ref)s.
+"""
+struct CouplingTerm
+    fields::Vector{FieldID}
+end
+@structural_equality CouplingTerm
+
+"""
+    CouplingResult
+
+Typed result of [`compute_couplings`](@ref). `terms` is empty when upstream
+successfully finds no allowed coupling. The sanitized `transcript` and exact
+upstream coupling-file `source` are retained for diagnostics and provenance.
+"""
+struct CouplingResult
+    request::CouplingRequest
+    configuration::VEVConfigurationRef
+    terms::Vector{CouplingTerm}
+    backend::BackendInfo
+    transcript::String
+    source::String
+end
+@structural_equality CouplingResult
+
+"""
+    CouplingSearchResult
+
+Result of [`search_couplings`](@ref). `requests` records the candidate
+monomials submitted through `max_order`; `involving` records the stable field
+identities passed to upstream `find(...)`; and `terms` contains the matching
+accepted couplings in the canonical saved-file representation.
+"""
+struct CouplingSearchResult
+    requests::Vector{CouplingRequest}
+    involving::Vector{FieldID}
+    max_order::Int
+    configuration::VEVConfigurationRef
+    terms::Vector{CouplingTerm}
+    backend::BackendInfo
+    transcript::String
+    source::String
+end
+@structural_equality CouplingSearchResult
+
+"""
+    UpstreamEffectiveCoupling
+
+One monomial from SUSY orbifolder's effective superpotential. `fields` remain
+dynamical, `vev_fields` were printed inside angle brackets, and `source`
+identifies the registered ordinary coupling from which the term arose.
+"""
+struct UpstreamEffectiveCoupling
+    source::CouplingTerm
+    fields::Vector{FieldID}
+    vev_fields::Vector{FieldID}
+end
+@structural_equality UpstreamEffectiveCoupling
+
+"""
+    EffectiveCouplingResult
+
+Effective superpotential reported after replaying a declarative SUSY VEV
+configuration and registering `requests`. Both ordinary `source_terms` and
+expanded effective `terms` retain stable field identities.
+"""
+struct EffectiveCouplingResult
+    specification::VEVConfigurationSpec
+    requests::Vector{CouplingRequest}
+    source_terms::Vector{CouplingTerm}
+    terms::Vector{UpstreamEffectiveCoupling}
+    backend::BackendInfo
+    transcript::String
+    source::String
+end
+@structural_equality EffectiveCouplingResult
+
+"""
+    CouplingParseError <: Exception
+
+Thrown when a saved upstream coupling file is malformed, does not belong to
+the supplied model, or refers to an unknown field. The complete `source` is
+retained for diagnosis.
+"""
+struct CouplingParseError <: Exception
+    message::String
+    source::String
+end
+
+Base.showerror(io::IO, e::CouplingParseError) =
+    print(io, "CouplingParseError: ", e.message)
+
+"""
+    CouplingExecutionError <: Exception
+
+Thrown when the upstream child-coupling protocol does not report successful
+completion or disagrees with its saved artifact. The complete `transcript` is
+retained so an empty physical result is never confused with execution failure.
+"""
+struct CouplingExecutionError <: Exception
+    message::String
+    transcript::String
+end
+
+Base.showerror(io::IO, e::CouplingExecutionError) =
+    print(io, "CouplingExecutionError: ", e.message)

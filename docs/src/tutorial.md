@@ -109,6 +109,8 @@ in reconstructing a highest weight from a printed representation dimension.
   localization, and queries.
 - [Model Classification and Generation](@ref): upstream model predicates,
   anomaly diagnostics, random candidates, and inequivalence.
+- [Couplings and the Superpotential](@ref): SUSY upstream coupling selection
+  with stable field references.
 - [OSCAR Integration](@ref): root systems, weights, and dual representations.
 - [Consistency and Batch Workflows](@ref): validation and concurrent scans.
 - [VEV Configurations](@ref): explicit selection, replayable derived

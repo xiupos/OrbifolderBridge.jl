@@ -224,6 +224,23 @@ function _run_model_script(model::OrbifolderModel, commands::Vector{<:AbstractSt
     )
 end
 
+function _run_model_script_artifacts(
+    model::OrbifolderModel,
+    commands::Vector{<:AbstractString};
+    collect_files::Vector{<:AbstractString} = String[],
+    timeout::Real = 120,
+)
+    filename = _model_filename(model)
+    all_commands = vcat(["load orbifolds($filename)", "cd $(model.label)"], commands)
+    return _run_orbifolder_script_artifacts(
+        model.mode,
+        all_commands;
+        files = Dict(filename => model_file_text(model)),
+        collect_files = collect_files,
+        timeout = timeout,
+    )
+end
+
 """
     compute_gauge_group(model::OrbifolderModel[, config]; timeout = 120) -> GaugeGroup
 
