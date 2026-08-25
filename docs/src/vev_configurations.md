@@ -87,6 +87,11 @@ sector.hidden_u1
 Indices are one-based and refer to the factor order in `gauge_group`. The
 bridge reports upstream's partition; it does not choose an observable sector.
 
+Use [`compare_gauge_embeddings`](@ref) when the exact change of non-abelian
+root and U(1) spans matters. It accepts two existing configuration references
+or a replayable [`VEVConfigurationSpec`](@ref) and compares only the gauge
+embeddings reported by upstream.
+
 ```@docs
 compute_gauge_sector
 parse_gauge_sector

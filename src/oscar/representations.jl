@@ -39,7 +39,7 @@ function find_weight_of_dimension(R::RootSystem, dim::Integer; max_coeff::Int = 
         w = WeightLatticeElem(R, coeffs)
         dim_of_simple_module(R, w) == dim && return w
     end
-    for i in 1:rank, j in (i+1):rank
+    for i in 1:rank-1, j in i+1:rank
         coeffs = zeros(Int, rank)
         coeffs[i] = 1
         coeffs[j] = 1
@@ -52,6 +52,43 @@ function find_weight_of_dimension(R::RootSystem, dim::Integer; max_coeff::Int = 
         "single/double fundamental-weight combinations (max_coeff=$max_coeff); specify the " *
         "representation explicitly by its weight instead of its printed dimension.",
     )
+end
+
+function _weight_candidates_of_dimension(R::RootSystem, dim::Integer; max_coeff::Int = 2)
+    rank = number_of_simple_roots(R)
+    candidates = WeightLatticeElem[]
+    dim == 1 && push!(candidates, WeightLatticeElem(R, zeros(Int, rank)))
+    for i in 1:rank, coefficient in 1:max_coeff
+        labels = zeros(Int, rank)
+        labels[i] = coefficient
+        weight = WeightLatticeElem(R, labels)
+        dim_of_simple_module(R, weight) == dim && push!(candidates, weight)
+    end
+    for i in 1:rank-1, j in i+1:rank
+        labels = zeros(Int, rank)
+        labels[i] = 1
+        labels[j] = 1
+        weight = WeightLatticeElem(R, labels)
+        dim_of_simple_module(R, weight) == dim && push!(candidates, weight)
+    end
+    return unique(candidates)
+end
+
+function _unambiguous_dimension_weight(R::RootSystem, reported::Int)
+    candidates = _weight_candidates_of_dimension(R, abs(reported))
+    isempty(candidates) && return representation_weight(R, reported)
+    orbits = Vector{WeightLatticeElem}[]
+    for candidate in candidates
+        any(orbit -> candidate in orbit, orbits) && continue
+        dual = dual_weight(R, candidate)
+        push!(orbits, candidate == dual ? [candidate] : [candidate, dual])
+    end
+    length(orbits) == 1 || error(
+        "reported dimension $reported is ambiguous between $(length(orbits)) " *
+        "non-conjugate highest-weight families; supply exact Dynkin labels",
+    )
+    representative = first(first(orbits))
+    return reported < 0 ? dual_weight(R, representative) : representative
 end
 
 """
@@ -93,4 +130,117 @@ function field_weights(root_systems::Vector{<:RootSystem}, field::SpectrumField)
         ),
     )
     return [representation_weight(R, r) for (R, r) in zip(root_systems, field.rep)]
+end
+
+"""
+    RepresentationWeight
+
+An OSCAR highest weight together with how it was obtained. `source` is
+`:exact_dynkin` when explicit Dynkin labels were supplied and
+`:dimension_fallback` when the signed dimension printed by upstream was used.
+`reported_dimension` retains that signed upstream value when available.
+
+The type parameter is the internal OSCAR weight representation and should not
+be relied upon by callers.
+"""
+struct RepresentationWeight{W}
+    factor_index::Int
+    reported_dimension::Union{Nothing,Int}
+    weight::W
+    source::Symbol
+end
+
+"""
+    representation_from_dynkin_labels(factor, labels;
+                                      reported_dimension = nothing)
+        -> RepresentationWeight
+
+Construct an exact OSCAR highest weight from nonnegative Dynkin labels tied to
+an [`EmbeddedGaugeFactor`](@ref). If `reported_dimension` is supplied, validate
+its magnitude against OSCAR's exact Weyl-dimension calculation.
+"""
+function representation_from_dynkin_labels(
+    factor::EmbeddedGaugeFactor,
+    labels::AbstractVector{<:Integer};
+    reported_dimension::Union{Nothing,Integer} = nothing,
+)
+    rank = number_of_simple_roots(factor.root_system)
+    length(labels) == rank || throw(ArgumentError(
+        "Dynkin label vector has length $(length(labels)), expected rank $rank",
+    ))
+    all(>=(0), labels) || throw(ArgumentError("highest-weight Dynkin labels must be nonnegative"))
+    weight = WeightLatticeElem(factor.root_system, Int.(labels))
+    reported = reported_dimension === nothing ? nothing : Int(reported_dimension)
+    if reported !== nothing
+        actual = dim_of_simple_module(factor.root_system, weight)
+        actual == abs(reported) || throw(ArgumentError(
+            "reported representation dimension $reported disagrees with exact highest-weight dimension $actual",
+        ))
+    end
+    return RepresentationWeight(factor.source.index, reported, weight, :exact_dynkin)
+end
+
+"""
+    resolve_representation(factor, reported_dimension; dynkin_labels = nothing)
+        -> RepresentationWeight
+
+Prefer exact `dynkin_labels` when supplied. Otherwise invoke the documented
+signed-dimension fallback and mark the result with `source ==
+:dimension_fallback`. In both cases the returned OSCAR weight is validated
+against the reported dimension.
+"""
+function resolve_representation(
+    factor::EmbeddedGaugeFactor,
+    reported_dimension::Integer;
+    dynkin_labels::Union{Nothing,AbstractVector{<:Integer}} = nothing,
+)
+    if dynkin_labels !== nothing
+        return representation_from_dynkin_labels(
+            factor,
+            dynkin_labels;
+            reported_dimension = reported_dimension,
+        )
+    end
+    reported = Int(reported_dimension)
+    weight = _unambiguous_dimension_weight(factor.root_system, reported)
+    actual = dim_of_simple_module(factor.root_system, weight)
+    actual == abs(reported) || error(
+        "dimension fallback produced dimension $actual for reported representation $reported",
+    )
+    return RepresentationWeight(
+        factor.source.index,
+        reported,
+        weight,
+        :dimension_fallback,
+    )
+end
+
+"""
+    resolve_field_representations(factors, field; dynkin_labels = nothing)
+        -> Vector{RepresentationWeight}
+
+Resolve every non-abelian representation of `field`. `dynkin_labels`, when
+available from an external or future upstream source, must contain one label
+vector per factor. Omitting it makes dimension fallback explicit in every
+returned result's provenance.
+"""
+function resolve_field_representations(
+    factors::AbstractVector{<:EmbeddedGaugeFactor},
+    field::SpectrumField;
+    dynkin_labels::Union{Nothing,AbstractVector{<:AbstractVector{<:Integer}}} = nothing,
+)
+    length(factors) == length(field.rep) || throw(ArgumentError(
+        "field.rep has $(length(field.rep)) entries but $(length(factors)) embedded factors were given",
+    ))
+    dynkin_labels === nothing || length(dynkin_labels) == length(factors) || throw(
+        ArgumentError("one Dynkin-label vector is required per gauge factor"),
+    )
+    return [
+        resolve_representation(
+            factor,
+            representation;
+            dynkin_labels = dynkin_labels === nothing ? nothing : dynkin_labels[index],
+        )
+        for (index, (factor, representation)) in enumerate(zip(factors, field.rep))
+    ]
 end

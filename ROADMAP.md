@@ -85,22 +85,32 @@ scoring, ranking, and landscape-search policy remain outside its scope.
 
 ## Phase 5: Exact gauge and representation data
 
-- [ ] **`[upstream]`** Parse non-abelian simple roots.
-- [ ] **`[upstream]`** Parse U(1) generators and their normalization.
-- [ ] **`[upstream]`** Parse the anomalous U(1) generator and anomaly data.
-- [ ] **`[bridge]`** Represent observable and hidden gauge factors explicitly.
-- [ ] **`[bridge]`** Construct OSCAR root and weight lattices from exact upstream
+- [x] **`[upstream]`** Parse non-abelian simple roots.
+- [x] **`[upstream]`** Parse U(1) generators.
+- [x] **`[investigate]`** Establish the upstream convention for U(1)
+      normalization. General charges use the 16-dimensional lattice inner
+      product; optional classification-specific target lengths are internal
+      and are not printed by the supported prompts.
+- [x] **`[upstream]`** Identify the anomalous U(1) generator and retain anomaly data.
+- [x] **`[bridge]`** Represent observable and hidden gauge factors explicitly.
+- [x] **`[bridge]`** Construct OSCAR root and weight lattices from exact upstream
       data, retaining their embedding in the 16-dimensional gauge lattice.
-- [ ] **`[bridge]`** Represent U(1) generators, their Gram matrix, and their
-      normalization as exact OSCAR rational matrices.
-- [ ] **`[investigate]`** Obtain exact Dynkin labels or highest weights when upstream provides
-      them.
-- [ ] **`[bridge]`** Convert exact Dynkin labels or highest weights to OSCAR
-      `WeightLatticeElem` values associated with the corresponding gauge factor.
-- [ ] **`[bridge]`** Reduce reliance on dimension-based representation inference.
-- [ ] **`[bridge]`** Validate reported representation dimensions against exact
+- [x] **`[bridge]`** Represent U(1) generators and their Gram matrix as exact
+      OSCAR rational matrices.
+- [x] **`[bridge]`** Represent the intrinsic U(1) basis normalization, dual
+      charge metric, and squared generator lengths as exact OSCAR rational
+      matrices and values.
+- [x] **`[investigate]`** Establish whether exact Dynkin labels or highest
+      weights are exposed by the supported command protocols. They are used
+      internally upstream but are not printed by a non-interactive command.
+- [x] **`[bridge]`** Convert supplied exact Dynkin labels or highest weights to
+      OSCAR `WeightLatticeElem` values associated with the corresponding gauge
+      factor, ready for a future upstream output source.
+- [x] **`[bridge]`** Make dimension-based representation inference an explicit,
+      provenance-tagged fallback behind exact-label resolution.
+- [x] **`[bridge]`** Validate reported representation dimensions against exact
       highest weights, while keeping dimension-based lookup an explicit fallback.
-- [ ] **`[bridge]`** Compare the exact gauge embeddings before and after a VEV
+- [x] **`[bridge]`** Compare the exact gauge embeddings before and after a VEV
       configuration, including surviving roots and U(1) directions, without
       recomputing the upstream Higgsing decision.
 

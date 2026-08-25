@@ -50,7 +50,7 @@ A detailed spectrum should preserve both grouped and individual views:
 
 The implemented [`FieldID`](@ref) wraps upstream's zero-based `field no.`,
 which is independent of the selected display-label scheme. Its stability scope
-is one model and backend field basis; provenance added in Phase 8 will identify
+is one model and backend field basis; provenance added in Phase 9 will identify
 that scope across serialized analyses. [`DetailedSpectrum`](@ref) carries the
 existing grouped [`Spectrum`](@ref) alongside individually identified
 [`DetailedField`](@ref)s, so no multiplicity information is discarded.
@@ -105,6 +105,20 @@ available: simple roots, U(1) generators and normalization, anomalous
 generators, and Dynkin labels or highest weights. Mapping a printed dimension
 back to a representation is necessarily ambiguous and should remain a fallback,
 not the preferred interchange format.
+
+[`ExactGaugeData`](@ref) retains the simple roots and U(1) generators printed
+by upstream as exact 16-dimensional rational vectors. The OSCAR conversion
+constructs an [`EmbeddedGaugeFactor`](@ref) for each non-abelian factor: its
+`RootSystem`, `WeightLattice`, embedded `ZZLat`, and fundamental-weight matrix
+share upstream's simple-root numbering. Construction verifies the complete
+Cartan matrix and rejects an unexpected ordering or output drift.
+
+[`compare_gauge_embeddings`](@ref) compares two such upstream results over
+`QQ`. It records identical simple roots, basis-independent containment in the
+other root or U(1) span, and exact intersection ranks. This describes the
+change reported by upstream; it does not decide which roots a VEV should
+break. A declarative derived configuration is inspected in the same isolated
+run in which it is created, since upstream configurations are process-local.
 
 ### Couplings and mass matrices
 

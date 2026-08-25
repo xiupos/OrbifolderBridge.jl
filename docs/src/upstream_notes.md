@@ -122,8 +122,45 @@ print summary                 # (in cd spectrum) scalar+fermion massless spectru
                                # reps and U(1) charges, under current vev-config
 print twist / print shift / print Wilson lines   # (in cd model)
 print gauge group             # (in cd "gauge group")
+print simple roots            # exact 16D roots, ordered by gauge factor
+print U1 generators           # exact 16D generators, ordered as spectrum charges
 exit                          # requires interactive "yes" confirmation
 ```
+
+The two exact gauge commands were verified with orbifolder 1.2.1 and
+nonSUSYorbifolder 1.0. Each vector is printed as two groups of eight rational
+entries. Simple roots are concatenated in gauge-factor order; the bridge
+recovers factor boundaries from the reported Cartan ranks. U(1) generators
+use the charge-column order. When `print summary` states that the first U(1)
+is anomalous, its first printed generator is therefore the exact anomalous
+direction.
+
+The command protocol does not print separate U(1) target-normalization
+constants. The bridge constructs the exact Gram matrix intrinsic to the
+printed basis without attributing a classification-specific target to it.
+Likewise,
+the group-theory implementation internally computes Dynkin labels and highest
+weights, but the supported prompt command tables expose neither value. Exact
+representation labels therefore remain unavailable without changing
+upstream; dimension-based conversion stays an explicit fallback.
+
+Source inspection establishes the part of the normalization convention that
+is common to all computations: `CState::RecalculateU1Charges` computes each
+charge as the 16-dimensional Euclidean inner product of the printed generator
+with a representative left-moving weight. Consequently the generator Gram
+matrix, its inverse charge metric, and squared lengths are exact intrinsic
+normalization data. `CAnalyseModel` also contains optional target lengths for
+particular classification schemes (for example `5/6` for one hypercharge
+scheme), but those targets are neither general gauge-basis metadata nor
+available from the supported prompt output.
+
+Although `CState` internally determines highest weights in Dynkin labels
+before mapping them to printed signed dimensions, `PrintStates` does not print
+those labels. Its nominal `left-moving p_sh` field is empty for the supported
+batch fixtures because the representative weight is not retained there.
+OrbifolderBridge can therefore validate and convert exact labels supplied by a
+future upstream source, while tagging current dimension inversion explicitly
+as a fallback.
 
 `print summary` supports modifiers: `with labels`, `of sectors`, `of sector
 T(k,m,n)`, `of fixed points`, `no U1s`. With `with labels`, each spectrum row
