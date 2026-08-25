@@ -1,0 +1,34 @@
+  ###########################################################################
+  #  The C++ Orbifolder                                                     #
+  #  Version: 1.2.1                                                         #
+  ###########################################################################
+
+/> load orbifolds(modelMSSM0.txt)
+
+  Load orbifolds from file "modelMSSM0.txt".
+  Orbifold "MSSM0" loaded.
+
+/> cd MSSM0
+/MSSM0> cd vev-config
+/MSSM0/vev-config> use config(TestConfig1)
+
+  Vev-configuration "TestConfig1" is already in use.
+
+/MSSM0/vev-config> cd ..
+/MSSM0> cd couplings
+/MSSM0/couplings> create coupling(F_1 F_11 F_13)
+
+  New child process "PID <redacted>" from command "create coupling(F_1 F_11 F_13)".
+
+/MSSM0/couplings> wait(1)
+
+  Waiting for child processes to finish...
+
+  PID <redacted> done: "create coupling(F_1 F_11 F_13)" TIME: 00:00:01
+
+  1 couplings created.
+
+  waiting done.
+/MSSM0/couplings> save couplings(bridge_couplings.txt)
+
+  Couplings saved to file "bridge_couplings.txt".

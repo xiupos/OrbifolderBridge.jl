@@ -1,0 +1,9 @@
+/MSSM0/couplings> print effective superpotential
+
+  W_eff = F_1 F_11 <F_13>
+
+/MSSM0/couplings> find effective(F_1 F_11)
+
+  Effective couplings involving F_1 F_11:
+
+  W_eff = F_1 F_11 <F_13>

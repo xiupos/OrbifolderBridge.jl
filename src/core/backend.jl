@@ -10,7 +10,7 @@ const _BACKEND_CAPABILITIES = Dict(
         :model_generation, :model_classification, :inequivalent_models,
         :coupling_refined_inequivalence, :anomaly_check, :vev_configurations,
         :vev_configuration_mutation, :field_vevs, :unbroken_gauge_group,
-        :exact_gauge_data,
+        :exact_gauge_data, :couplings,
     ),
     (:nonsusy, v"1.0.0") => (
         :consistency, :gauge_group, :spectrum, :detailed_spectrum,

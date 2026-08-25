@@ -20,6 +20,7 @@ makedocs(;
             "Spectra and Fields" => "spectra.md",
             "VEV Configurations" => "vev_configurations.md",
             "Model Classification and Generation" => "generation.md",
+            "Couplings and the Superpotential" => "couplings.md",
             "OSCAR Integration" => "oscar.md",
             "Consistency and Batch Workflows" => "batch.md",
         ],

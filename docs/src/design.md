@@ -128,6 +128,36 @@ order and effective-VEV information. A mass-matrix entry should remain linked
 to the coupling expressions that generated it before optional conversion to an
 OSCAR polynomial matrix.
 
+Ordinary coupling requests are implemented for SUSY orbifolder. A request is
+expressed entirely in `FieldID` values; the bridge resolves configuration-local
+labels only while rendering the command. Upstream performs the calculation in
+a child process, after which the bridge parses `save couplings(...)`. That
+native format stores zero-based internal field numbers and a complete gauge-
+embedding header, making it a stronger interchange format than the formatted
+`W = ...` display. The parser checks the header against the model and the
+numbers against the inspected field basis before constructing `CouplingTerm`
+values.
+
+The supported non-SUSY backend has no coupling commands beyond `dir` and does
+not advertise this capability. Interactive classification through `remove
+vanishing couplings` is also outside the non-interactive API until upstream
+can provide a reproducible decision without reading from raw stdin.
+
+Parsed coupling terms map to a canonical OSCAR polynomial ring over `QQ`
+whose generator names and inverse dictionary derive from stable field numbers.
+Since upstream does not report exact numerical coupling strengths, allowed
+monomials carry unit coefficients rather than invented constants. Exact VEV
+substitution maps a VEV field generator to a distinct symbolic `v_<number>`
+generator. It does not coerce upstream's floating-point VEV magnitude into an
+exact coefficient, and each image remains paired with its source term.
+
+For declarative SUSY configurations, ordinary coupling generation and
+`print effective superpotential` execute in the same process that creates the
+configuration. The effective-expression parser expands upstream's implicit
+products and parenthesized sums, separates dynamical and VEV fields, and
+matches every expanded term back to a registered ordinary coupling. It does
+not infer effective terms independently.
+
 ## Execution model
 
 Every invocation runs in an isolated temporary directory. Backend-specific

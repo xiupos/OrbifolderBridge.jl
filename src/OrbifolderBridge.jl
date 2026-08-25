@@ -29,6 +29,14 @@ export EmbeddedGaugeFactor, embedded_gauge_factor, embedded_gauge_factors
 export fundamental_weight_matrix, embed_weight
 export RepresentationWeight, representation_from_dynkin_labels
 export resolve_representation, resolve_field_representations
+export CouplingRequest, CouplingTerm, CouplingResult, CouplingSearchResult
+export UpstreamEffectiveCoupling, EffectiveCouplingResult
+export CouplingParseError, CouplingExecutionError
+export parse_couplings, parse_effective_couplings
+export compute_couplings, search_couplings, compute_effective_couplings
+export CouplingPolynomialRing, ExactVEVSubstitution, EffectiveCouplingPolynomial
+export coupling_polynomial_ring, coupling_polynomial
+export exact_vev_substitution, apply_vev_substitution
 export OrbifolderModel, model_file_text
 export UpstreamModelParseError, parse_orbifolder_models
 export ModelClassification, AnomalyReport, GenerationDiagnostic
@@ -54,10 +62,12 @@ include("core/configuration.jl")
 include("core/exact_gauge.jl")
 include("core/consistency.jl")
 include("core/generation.jl")
+include("core/couplings.jl")
 
 include("oscar/cartan_type.jl")
 include("oscar/exact_gauge.jl")
 include("oscar/representations.jl")
+include("oscar/couplings.jl")
 
 include("parallel.jl")
 

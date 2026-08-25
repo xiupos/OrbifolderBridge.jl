@@ -273,7 +273,7 @@ dimension. Individual field numbers no longer reproduce those projected
 multiplicities one-for-one. The bridge retains the grouped spectrum but does
 not construct a misleading detailed spectrum for that case.
 
-## Couplings (`cd couplings`) — explored but not yet parsed
+## Couplings (`cd couplings`)
 
 A `couplings` subdirectory exists in the command tree but ships no `.man`
 page. `dir`/`help` inside it list:
@@ -289,15 +289,58 @@ mass matrix(A B)
 auto create mass matrix(A B)
 ```
 
-`fields` are referenced by the `with labels` names (`F_1`, `F_2`, ...).
-Calling `find(F_1 F_2)` directly after loading a model returns `W = 0` —
-`find` appears to search only couplings that were previously registered via
-`create coupling(...)`, not compute them from scratch on demand. Working out
-the exact create/find/save protocol (and the resulting output grammar for
-non-trivial `W`) needs more dedicated exploration than fits in Phase 3's
-budget; the gauge group / spectrum / twist / shift / Wilson line parsers in
-`src/core/parsers.jl` are solid and fixture-tested, but coupling parsing is
-deferred to a follow-up increment.
+These commands are implemented only by SUSY orbifolder 1.2.1. The non-SUSY
+1.0 command table for this directory contains only `dir`; it has no Yukawa-
+coupling implementation.
+
+`fields` are referenced by the active `with labels` names (`F_1`, `F_2`,
+...). `create coupling(...)` requires at least three factors and forks an
+upstream child process. A deterministic batch script must follow it with
+`wait(1)` before reading or saving the registered result. `find(...)` does not
+calculate new couplings: it filters the configuration's already registered
+couplings. A verified non-empty sequence is:
+
+```text
+create coupling(F_1 F_11 F_13)
+wait(1)
+print superpotential
+save couplings(couplings.txt)
+```
+
+For the `MSSM0` fixture this prints `W = F_1 F_11 F_13` and reports one
+created coupling. The saved file contains nine header lines—the lattice, two
+shifts, and six Wilson lines—followed by rows of zero-based internal field
+numbers. The corresponding row is `11 37 39`, exactly matching the `field
+no.` values used by the bridge's `FieldID`. An empty allowed set is a valid
+header with no following rows.
+
+Although multiple `create coupling(...)` children can be launched before one
+`wait(1)`, SUSY 1.2.1 can print `waiting done.` before every child result has
+been loaded into the configuration; a later command then collects the lagging
+child. Reproducible scripts must place `wait(1)` immediately after each
+creation. `find(fields)` then filters the registered collection. The documented
+`save couplings(Filename) of order(X)` option is defective in 1.2.1:
+`CPrompt` calls `FindParameterType2` on the extracted filename rather than on
+the trailing option string. The bridge limits the explicit requests sent to
+upstream instead of relying on this filter.
+
+`remove vanishing couplings` is not safely batchable in general. When it sees
+a representation pattern not present in its process-local known-zero/nonzero
+tables, it asks `Coupling zero? (y/n)` on raw stdin. OrbifolderBridge therefore
+does not invoke it or replace that physical decision with Julia logic.
+
+With a nonzero VEV, `print effective superpotential` and `find effective(...)`
+write angle-bracketed VEV factors. For example, assigning `vev(F_13)=1.0`
+after registering `F_1 F_11 F_13` prints:
+
+```text
+W_eff = F_1 F_11 <F_13>
+```
+
+When several ordinary terms have the same non-VEV fields, `CPrint` groups the
+VEV products in parentheses separated by `+`. The bridge parses and expands
+this presentation, then verifies each monomial against the native saved
+ordinary coupling set.
 
 Model definition file format (used by `load orbifolds(...)`), shared by both
 tools:
