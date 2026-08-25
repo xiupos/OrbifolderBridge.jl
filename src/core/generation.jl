@@ -22,6 +22,7 @@ struct ModelClassification
     backend::BackendInfo
     transcript::String
 end
+@structural_equality ModelClassification
 
 """
     AnomalyReport
@@ -35,6 +36,7 @@ struct AnomalyReport
     backend::BackendInfo
     output::String
 end
+@structural_equality AnomalyReport
 
 """
     GenerationDiagnostic
@@ -48,6 +50,7 @@ struct GenerationDiagnostic
     kind::Symbol
     message::String
 end
+@structural_equality GenerationDiagnostic
 
 """
     ModelGenerationRequest
@@ -70,6 +73,7 @@ struct ModelGenerationRequest
     compare_couplings_through::Union{Nothing,Int}
     check_anomalies::Bool
 end
+@structural_equality ModelGenerationRequest
 
 function ModelGenerationRequest(;
     count::Integer = 1,
@@ -119,19 +123,7 @@ struct ModelGenerationResult
     backend::BackendInfo
     transcript::String
 end
-
-for T in (
-    :ModelClassification,
-    :AnomalyReport,
-    :GenerationDiagnostic,
-    :ModelGenerationRequest,
-    :ModelGenerationResult,
-)
-    @eval begin
-        Base.:(==)(a::$T, b::$T) = all(getfield(a, f) == getfield(b, f) for f in fieldnames($T))
-        Base.hash(a::$T, h::UInt) = hash(ntuple(i -> getfield(a, i), fieldcount($T)), hash($T, h))
-    end
-end
+@structural_equality ModelGenerationResult
 
 _sanitized_generation_transcript(text::AbstractString) =
     replace(String(text), r"PID\s+[0-9]+" => "PID <redacted>")

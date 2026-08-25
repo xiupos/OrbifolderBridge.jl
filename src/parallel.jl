@@ -14,11 +14,16 @@ function _parallel_compute(
     commands::Vector{<:AbstractString},
     keyword::AbstractString,
     parser;
+    config::Union{Nothing,VEVConfigurationRef} = nothing,
     ntasks::Int = 4,
     timeout::Real = 120,
 )
-    raws = asyncmap(m -> _run_model_script(m, commands; timeout = timeout), models; ntasks = ntasks)
-    return [parser(output_for(split_transcript(r), keyword)) for r in raws]
+    full_commands = _configuration_commands(config, commands)
+    raws = asyncmap(m -> _run_model_script(m, full_commands; timeout = timeout), models; ntasks = ntasks)
+    return map(raws) do output
+        _validate_configuration_selection(output, config)
+        parser(output_for(split_transcript(output), keyword))
+    end
 end
 
 """
@@ -29,23 +34,15 @@ Parallel form of [`compute_spectrum`](@ref): runs up to `ntasks` `orbifolder`/
 gets its own `mktempdir`, so runs never interfere with each other), then
 parses every result sequentially.
 """
-compute_spectra(models::AbstractVector{OrbifolderModel}; kwargs...) =
-    _parallel_compute(models, ["cd spectrum", "print summary"], "print summary", parse_spectrum; kwargs...)
-
-function compute_spectra(
+compute_spectra(
     models::AbstractVector{OrbifolderModel},
-    config::VEVConfigurationRef;
+    config::Union{Nothing,VEVConfigurationRef} = nothing;
     ntasks::Int = 4,
     timeout::Real = 120,
+) = _parallel_compute(
+    models, ["cd spectrum", "print summary"], "print summary", parse_spectrum;
+    config = config, ntasks = ntasks, timeout = timeout,
 )
-    parser = output -> begin
-        _validate_configuration_selection(output, config)
-        parse_spectrum(output_for(split_transcript(output), "print summary"))
-    end
-    commands = _configuration_commands(config, ["cd spectrum", "print summary"])
-    raws = asyncmap(m -> _run_model_script(m, commands; timeout = timeout), models; ntasks = ntasks)
-    return parser.(raws)
-end
 
 """
     compute_gauge_groups(models::AbstractVector{OrbifolderModel}; ntasks = 4, timeout = 120) -> Vector{GaugeGroup}
@@ -53,23 +50,15 @@ end
 Parallel form of [`compute_gauge_group`](@ref); see [`compute_spectra`](@ref)
 for the concurrency model.
 """
-compute_gauge_groups(models::AbstractVector{OrbifolderModel}; kwargs...) = _parallel_compute(
-    models, ["cd gauge group", "print gauge group"], "print gauge group", parse_gauge_group; kwargs...,
-)
-
-function compute_gauge_groups(
+compute_gauge_groups(
     models::AbstractVector{OrbifolderModel},
-    config::VEVConfigurationRef;
+    config::Union{Nothing,VEVConfigurationRef} = nothing;
     ntasks::Int = 4,
     timeout::Real = 120,
+) = _parallel_compute(
+    models, ["cd gauge group", "print gauge group"], "print gauge group", parse_gauge_group;
+    config = config, ntasks = ntasks, timeout = timeout,
 )
-    commands = _configuration_commands(config, ["cd gauge group", "print gauge group"])
-    raws = asyncmap(m -> _run_model_script(m, commands; timeout = timeout), models; ntasks = ntasks)
-    return map(raws) do output
-        _validate_configuration_selection(output, config)
-        parse_gauge_group(output_for(split_transcript(output), "print gauge group"))
-    end
-end
 
 """
     compute_twists(models::AbstractVector{OrbifolderModel}; ntasks = 4, timeout = 120) -> Vector{Twist}
@@ -77,8 +66,11 @@ end
 Parallel form of [`compute_twist`](@ref); see [`compute_spectra`](@ref) for
 the concurrency model.
 """
-compute_twists(models::AbstractVector{OrbifolderModel}; kwargs...) =
-    _parallel_compute(models, ["cd model", "print twist"], "print twist", parse_twist; kwargs...)
+compute_twists(models::AbstractVector{OrbifolderModel}; ntasks::Int = 4, timeout::Real = 120) =
+    _parallel_compute(
+        models, ["cd model", "print twist"], "print twist", parse_twist;
+        ntasks = ntasks, timeout = timeout,
+    )
 
 """
     compute_shift_vectors_batch(models::AbstractVector{OrbifolderModel}; ntasks = 4, timeout = 120) -> Vector{Vector{ShiftVector}}
@@ -86,8 +78,14 @@ compute_twists(models::AbstractVector{OrbifolderModel}; kwargs...) =
 Parallel form of [`compute_shift_vectors`](@ref); see [`compute_spectra`](@ref)
 for the concurrency model.
 """
-compute_shift_vectors_batch(models::AbstractVector{OrbifolderModel}; kwargs...) =
-    _parallel_compute(models, ["cd model", "print shift"], "print shift", parse_shift_vectors; kwargs...)
+compute_shift_vectors_batch(
+    models::AbstractVector{OrbifolderModel};
+    ntasks::Int = 4,
+    timeout::Real = 120,
+) = _parallel_compute(
+    models, ["cd model", "print shift"], "print shift", parse_shift_vectors;
+    ntasks = ntasks, timeout = timeout,
+)
 
 """
     compute_wilson_lines_batch(models::AbstractVector{OrbifolderModel}; ntasks = 4, timeout = 120) -> Vector{WilsonLines}
@@ -95,6 +93,11 @@ compute_shift_vectors_batch(models::AbstractVector{OrbifolderModel}; kwargs...) 
 Parallel form of [`compute_wilson_lines`](@ref); see [`compute_spectra`](@ref)
 for the concurrency model.
 """
-compute_wilson_lines_batch(models::AbstractVector{OrbifolderModel}; kwargs...) = _parallel_compute(
-    models, ["cd model", "print Wilson lines"], "print Wilson lines", parse_wilson_lines; kwargs...,
+compute_wilson_lines_batch(
+    models::AbstractVector{OrbifolderModel};
+    ntasks::Int = 4,
+    timeout::Real = 120,
+) = _parallel_compute(
+    models, ["cd model", "print Wilson lines"], "print Wilson lines", parse_wilson_lines;
+    ntasks = ntasks, timeout = timeout,
 )

@@ -22,6 +22,10 @@ Configuration can also come from `ORBIFOLDER_BIN`,
 environment variables, then Preferences.jl settings, then documented path
 fallbacks.
 
+Relative paths are accepted and resolved against the current directory at
+configuration time: the getters always return absolute paths, because each
+invocation runs in its own temporary working directory.
+
 The binary and Geometry directory must belong to a compatible upstream tree.
 [`backend_info`](@ref) validates both paths, runs the backend through its real
 isolated batch protocol, and reads the kind and version from the startup
@@ -38,6 +42,12 @@ OrbifolderBridge currently supports `orbifolder` 1.2.1 and
 [`BackendCompatibilityError`](@ref) instead of allowing a parser to return
 partial data. Every typed computation and raw script performs this preflight
 check.
+
+The configured paths, the executable bit, and the `Geometry/` inventory are
+re-checked on every call, but a successful probe is cached per binary path and
+modification time, so a computation launches the backend once rather than
+twice. Rebuilding the binary invalidates the cache; `refresh = true` forces a
+new probe.
 
 ```@docs
 orbifolder_binary
@@ -78,7 +88,8 @@ result.ok || @warn result.message
 
 This check is deliberately lightweight: it verifies the executable, requires
 a nonempty Geometry-file inventory, and completes the backend's normal script
-protocol without loading a physical model.
+protocol without loading a physical model. Being a diagnostic, it always
+re-probes the executable instead of reusing a cached [`backend_info`](@ref).
 
 ```@docs
 supports

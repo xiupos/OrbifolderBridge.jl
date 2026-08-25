@@ -13,11 +13,7 @@ struct ConsistencyResult
     message::String
     output::String
 end
-
-Base.:(==)(a::ConsistencyResult, b::ConsistencyResult) =
-    all(getfield(a, f) == getfield(b, f) for f in fieldnames(ConsistencyResult))
-Base.hash(result::ConsistencyResult, h::UInt) =
-    hash((result.valid, result.message, result.output), hash(ConsistencyResult, h))
+@structural_equality ConsistencyResult
 
 # These phrases come from the model-loading paths in upstream COrbifoldGroup
 # and CPrompt.  Keep this list deliberately narrow: an unknown diagnostic is

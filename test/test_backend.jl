@@ -5,15 +5,21 @@ function _fake_backend_tree(kind::Symbol, banner::AbstractString)
     write(joinpath(geometry, "Geometry_Z3_1_1.txt"), "fixture\n")
 
     binary = joinpath(dir, kind === :susy ? "orbifolder" : "nonSUSYorbifolder")
+    # Every fake launch appends a line, so tests can assert how many
+    # subprocesses an operation actually spawned.
+    tally = "echo x >> \"$(joinpath(dir, "launches"))\"\n"
     script = if kind === :susy
-        "#!/bin/sh\ncat >/dev/null\nprintf '%s\\n' '$banner'\n"
+        "#!/bin/sh\n$(tally)cat >/dev/null\nprintf '%s\\n' '$banner'\n"
     else
-        "#!/bin/sh\nprintf '%s\\n' '$banner'\nprintf '%s\\n' '$banner' > result_\"\$2\"\n"
+        "#!/bin/sh\n$(tally)printf '%s\\n' '$banner'\nprintf '%s\\n' '$banner' > result_\"\$2\"\n"
     end
     write(binary, script)
     chmod(binary, 0o755)
     return dir, binary, geometry
 end
+
+_launch_count(dir) =
+    isfile(joinpath(dir, "launches")) ? countlines(joinpath(dir, "launches")) : 0
 
 @testset "backend banner parsing and capabilities" begin
     dir, binary, geometry = _fake_backend_tree(
@@ -101,5 +107,73 @@ end
             @test !result.ok
             @test occursin("not executable", result.message)
         end
+    end
+end
+
+@testset "configured paths are resolved to absolute paths" begin
+    # Every invocation runs with dir = mktempdir(), so a relative configured
+    # path would be resolved against that temporary directory and fail to
+    # spawn. Regression test: the resolvers must absolutize.
+    dir, binary, geometry = _fake_backend_tree(
+        :nonsusy,
+        "#  Non-SUSY Orbifolder  #\n#  Version: 1.0  #",
+    )
+    try
+        cd(dir) do
+            withenv(
+                "NONSUSYORBIFOLDER_BIN" => "./nonSUSYorbifolder",
+                "NONSUSYORBIFOLDER_GEOMETRY_DIR" => "./Geometry",
+            ) do
+                @test isabspath(orbifolder_binary(:nonsusy))
+                @test isabspath(orbifolder_geometry_dir(:nonsusy))
+                @test isfile(orbifolder_binary(:nonsusy))
+                # The end-to-end path that previously failed with ENOENT.
+                OrbifolderBridge._clear_backend_info_cache!()
+                @test backend_info(:nonsusy).version == v"1.0.0"
+            end
+        end
+    finally
+        rm(dir; recursive = true)
+    end
+end
+
+@testset "successful backend probes are cached per binary" begin
+    dir, binary, geometry = _fake_backend_tree(
+        :nonsusy,
+        "#  Non-SUSY Orbifolder  #\n#  Version: 1.0  #",
+    )
+    try
+        withenv(
+            "NONSUSYORBIFOLDER_BIN" => binary,
+            "NONSUSYORBIFOLDER_GEOMETRY_DIR" => geometry,
+        ) do
+            OrbifolderBridge._clear_backend_info_cache!()
+            first_info = backend_info(:nonsusy)
+            @test _launch_count(dir) == 1
+            @test backend_info(:nonsusy) == first_info
+            @test backend_info(:nonsusy) == first_info
+            @test _launch_count(dir) == 1          # cached: no new subprocess
+
+            @test backend_info(:nonsusy; refresh = true) == first_info
+            @test _launch_count(dir) == 2          # refresh re-probes
+
+            # check_backend is a diagnostic and must actually run the backend.
+            selftest = check_backend(:nonsusy)
+            @test selftest.ok
+            @test selftest == BackendSelfTest(first_info, true, selftest.message, "")
+            @test _launch_count(dir) == 3
+
+            # A rebuilt binary invalidates the cache.
+            before = mtime(binary)
+            sleep(0.05)
+            write(binary, read(binary, String))
+            chmod(binary, 0o755)
+            @test mtime(binary) != before      # precondition for the next assertion
+            backend_info(:nonsusy)
+            @test _launch_count(dir) == 4
+        end
+    finally
+        OrbifolderBridge._clear_backend_info_cache!()
+        rm(dir; recursive = true)
     end
 end

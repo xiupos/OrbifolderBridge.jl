@@ -21,11 +21,7 @@ struct OrbifolderModel
     shift3::Vector{Rational{Int}}
     wilson_lines::Vector{Vector{Rational{Int}}}
 end
-
-Base.:(==)(a::OrbifolderModel, b::OrbifolderModel) =
-    all(getfield(a, f) == getfield(b, f) for f in fieldnames(OrbifolderModel))
-Base.hash(model::OrbifolderModel, h::UInt) =
-    hash(ntuple(i -> getfield(model, i), fieldcount(OrbifolderModel)), hash(OrbifolderModel, h))
+@structural_equality OrbifolderModel
 
 function _validate_vector16(name::AbstractString, v::AbstractVector)
     length(v) == 16 || throw(ArgumentError("$name must have length 16, got $(length(v))"))
