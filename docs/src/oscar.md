@@ -29,6 +29,142 @@ algebra_to_cartan_type
 gauge_group_root_systems
 ```
 
+## Exact gauge-lattice embeddings
+
+Upstream can also print the simple roots and U(1) generators in their exact
+16-dimensional heterotic gauge-lattice embedding:
+
+```julia
+data = compute_exact_gauge_data(model, VEVConfigurationRef("TestConfig1"))
+roots = simple_root_matrix(data.factors[1])
+generators = u1_generator_matrix(data)
+gram = u1_gram_matrix(data)
+normalization = u1_normalization(data)
+
+factor = embedded_gauge_factor(data.factors[1])
+root_lattice = factor.root_lattice
+weight_lattice = factor.weight_lattice
+fundamental_weights = fundamental_weight_matrix(factor)
+```
+
+The returned [`ExactGaugeData`](@ref) groups roots by the ordered non-abelian
+factors and retains observable and hidden factor indices. Its
+`anomalous_u1` field identifies the generator explicitly reported as
+anomalous by the spectrum summary. Matrix constructors return exact OSCAR
+matrices over `QQ`; they do not infer a normalization convention that
+upstream does not print.
+
+[`u1_normalization`](@ref) packages the exact Gram matrix, its inverse metric
+on charge covectors, the squared generator lengths, and whether the printed
+basis is orthogonal. These are intrinsic to the generators and the
+16-dimensional lattice inner product used by upstream. Optional target
+normalizations used internally by particular model-classification schemes are
+not claimed because the prompt does not expose them.
+
+[`embedded_gauge_factor`](@ref) checks that the exact root Gram matrix equals
+OSCAR's Cartan matrix in the upstream order. It then constructs an embedded
+OSCAR `ZZLat`, the associated abstract `RootSystem` and `WeightLattice`, and
+the 16-dimensional fundamental weights. This makes the correspondence of
+simple roots and Dynkin-label positions explicit rather than retaining only
+the algebra name.
+
+An OSCAR weight from that factor can be returned to the upstream gauge-lattice
+basis without losing exactness:
+
+```julia
+w = Oscar.fundamental_weight(factor.root_system, 1)
+embedded_w = embed_weight(factor, w) # 1 × 16 matrix over QQ
+```
+
+## Exact and fallback representation resolution
+
+When exact Dynkin labels are available, connect them to the corresponding
+embedded factor and validate the printed dimension:
+
+```julia
+resolved = representation_from_dynkin_labels(
+    factor,
+    [1, 0];
+    reported_dimension = 3,
+)
+resolved.source # :exact_dynkin
+```
+
+The supported upstream prompts currently print only signed dimensions. Their
+conversion remains available, but its provenance is explicit:
+
+```julia
+resolved = resolve_representation(factor, -3)
+resolved.source # :dimension_fallback
+
+all_resolved = resolve_field_representations(factors, field)
+```
+
+Pass `dynkin_labels` to `resolve_representation` or one label vector per factor
+to `resolve_field_representations` to select the exact path. OSCAR's exact
+Weyl-dimension calculation must agree with every supplied reported dimension;
+a mismatch raises an error. Dimension fallback also rejects dimensions shared
+by multiple non-conjugate highest-weight families. A signed dimension may
+select between one conjugate pair, but it is never used to guess between
+unrelated representations.
+
+## Comparing VEV configurations
+
+Compare two existing configurations explicitly:
+
+```julia
+comparison = compare_gauge_embeddings(
+    model,
+    VEVConfigurationRef("TestConfig1"),
+    VEVConfigurationRef("StandardConfig1"),
+)
+
+comparison.shared_simple_roots
+comparison.nonabelian_intersection_rank
+comparison.before_u1_in_after_span
+comparison.u1_intersection_rank
+```
+
+For a [`VEVConfigurationSpec`](@ref), the derived exact gauge data is read in
+the same isolated process in which the configuration is created:
+
+```julia
+spec = VEVConfigurationSpec(
+    name = "HiggsConfig1",
+    assignments = [VEVAssignment(FieldID(11), 1.0)],
+)
+comparison = compare_gauge_embeddings(model, spec)
+```
+
+The comparison uses exact row spaces over `QQ`, so it recognizes a surviving
+subspace even if upstream chooses a different simple-root or U(1) basis. It
+also reports identical simple-root directions for direct inspection. These
+are comparisons of two upstream results, not a Julia implementation of the
+Higgsing decision.
+
+```@docs
+GaugeFactorEmbedding
+ExactGaugeData
+parse_exact_gauge_data
+compute_exact_gauge_data
+simple_root_matrix
+u1_generator_matrix
+u1_gram_matrix
+U1NormalizationData
+u1_normalization
+EmbeddedGaugeFactor
+embedded_gauge_factor
+embedded_gauge_factors
+fundamental_weight_matrix
+embed_weight
+RepresentationWeight
+representation_from_dynkin_labels
+resolve_representation
+resolve_field_representations
+GaugeEmbeddingComparison
+compare_gauge_embeddings
+```
+
 ## Representations as highest weights
 
 ```julia

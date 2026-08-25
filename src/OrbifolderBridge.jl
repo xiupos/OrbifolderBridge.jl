@@ -10,16 +10,25 @@ export OrbifolderProcessError, OrbifolderTimeoutError, run_capture
 export run_orbifolder_script
 export split_transcript, output_for, parse_rational, parse_rational_vector
 export GaugeGroup, SpectrumField, Spectrum, FieldID, Sector, FieldLocalization
+export GaugeFactorEmbedding, ExactGaugeData
 export DetailedField, DetailedSpectrum, Twist, ShiftVector, WilsonLine, WilsonLines
 export VEVConfigurationRef, VEVConfigurationSummary, GaugeSector
 export VEVAssignment, FieldVEV, VEVConfigurationSpec, VEVConfigurationResult
 export VEVConfigurationError, parse_vev_configurations, parse_gauge_sector, parse_field_vevs
 export list_vev_configurations, compute_gauge_sector, materialize_vev_configuration
 export parse_gauge_group, parse_spectrum, parse_detailed_spectrum, find_fields
+export parse_exact_gauge_data, compute_exact_gauge_data
+export GaugeEmbeddingComparison, compare_gauge_embeddings
 export parse_twist, parse_shift_vectors, parse_wilson_lines
 export algebra_to_cartan_type
 export dual_weight, find_weight_of_dimension, representation_weight
 export gauge_group_root_systems, field_weights
+export simple_root_matrix, u1_generator_matrix, u1_gram_matrix
+export U1NormalizationData, u1_normalization
+export EmbeddedGaugeFactor, embedded_gauge_factor, embedded_gauge_factors
+export fundamental_weight_matrix, embed_weight
+export RepresentationWeight, representation_from_dynkin_labels
+export resolve_representation, resolve_field_representations
 export OrbifolderModel, model_file_text
 export UpstreamModelParseError, parse_orbifolder_models
 export ModelClassification, AnomalyReport, GenerationDiagnostic
@@ -42,10 +51,12 @@ include("core/types.jl")
 include("core/parsers.jl")
 include("core/model.jl")
 include("core/configuration.jl")
+include("core/exact_gauge.jl")
 include("core/consistency.jl")
 include("core/generation.jl")
 
 include("oscar/cartan_type.jl")
+include("oscar/exact_gauge.jl")
 include("oscar/representations.jl")
 
 include("parallel.jl")

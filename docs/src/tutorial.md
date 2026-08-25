@@ -17,6 +17,11 @@ The bridge does not reproduce upstream's physics algorithms. Spectrum
 construction, modular-invariance checks, projections, and coupling selection
 remain upstream computations.
 
+Exact gauge-lattice embeddings are available through
+[`compute_exact_gauge_data`](@ref). The result retains the 16-dimensional
+simple roots and U(1) generators reported by upstream and can be converted to
+OSCAR matrices over `QQ`; see [Exact gauge-lattice embeddings](@ref).
+
 ## A first model
 
 The following is the ``\mathbb Z_3`` model used throughout this guide:
