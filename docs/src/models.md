@@ -95,3 +95,42 @@ ShiftVector
 WilsonLine
 WilsonLines
 ```
+
+## Space-group catalogue and metadata
+
+The compatible Geometry files for a model's point group can be enumerated
+without interpreting their filenames:
+
+```julia
+groups = available_space_groups(model)
+groups[1].lattice_label
+groups[1].geometry_file
+```
+
+Each [`SpaceGroupInfo`](@ref) retains the backend because the SUSY and
+non-SUSY Geometry files have different constructing-element grammars even
+when their filenames coincide. The selected Geometry can be inspected with:
+
+```julia
+geometry = space_group_metadata(model)
+geometry.point_group_orders
+geometry.lattice_label
+geometry.generators
+```
+
+[`SpaceGroupMetadata`](@ref) contains the point-group orders, compactification
+root-lattice label, optional additional label, Geometry filename, and the
+generators printed by upstream. A [`SpaceGroupElement`](@ref) combines a
+backend-shaped [`Sector`](@ref) with the exact six-dimensional translation.
+The bridge does not reproduce the upstream Geometry-file engine.
+
+```@docs
+available_space_groups
+space_group_metadata
+parse_available_space_groups
+parse_space_group_metadata
+SpaceGroupInfo
+SpaceGroupMetadata
+SpaceGroupElement
+GeometryParseError
+```

@@ -8,6 +8,7 @@ using OrbifolderBridge
     include("test_oscar_mapping.jl")
     include("test_exact_gauge.jl")
     include("test_model.jl")
+    include("test_geometry.jl")
     include("test_configuration.jl")
     include("test_generation.jl")
     include("test_couplings.jl")

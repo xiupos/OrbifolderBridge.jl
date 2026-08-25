@@ -87,6 +87,36 @@ DetailedField
 DetailedSpectrum
 ```
 
+## Localized states and local shifts
+
+Turn the field-level localization data into one object per fixed point or
+fixed brane:
+
+```julia
+locations = localizations(detailed)
+location = first(locations)
+states = fields_at(location, detailed)
+local = local_gauge_data(location, detailed)
+```
+
+[`Localization`](@ref) is keyed by the complete constructing element, not by
+its display label alone. It retains the exact 16D local shift and stable
+[`FieldID`](@ref)s at that location. [`LocalGaugeData`](@ref) joins those IDs
+to the detailed states. It deliberately does not infer a local gauge group
+from the shift; upstream remains responsible for that physical computation.
+
+Use `compute_localizations(model, config)` when a detailed spectrum has not
+already been obtained.
+
+```@docs
+Localization
+LocalGaugeData
+localizations
+compute_localizations
+fields_at
+local_gauge_data
+```
+
 ## Finding fields
 
 [`find_fields`](@ref) combines all supplied conditions:

@@ -382,7 +382,23 @@ end model
 ```
 
 Point-group-compatible `Geometry_*.txt` space-group files ship under
-`Geometry/` in both repos (same file set/format).
+`Geometry/` in both repos. The supported trees each contain the same 138
+filenames, but their contents and grammar differ: nonSUSYorbifolder prepends
+the Witten `Z_2` twist coordinate, so its sectors and constructing elements
+have three point-group coordinates where SUSY orbifolder has two.
+
+Both prompts implement `print available space groups`, `print point group`,
+and `print space group` in the model directory. The first scans the staged
+`Geometry/` directory for the loaded point-group orders and prints an indexed
+table of compactification lattice labels, optional additional labels, and
+filenames. `print space group` prints the compactification root-lattice label
+and generators. The latter use `(k,l)` sectors in SUSY and `(k,m,n)` sectors
+in non-SUSY, followed by six translation coefficients.
+
+The SUSY source contains a `print local matter(...)` command branch, but its
+body is commented out in 1.2.1; it is not a usable source of a local gauge
+group. Phase 8 therefore retains the `V_loc` printed by the fixed-point
+summary and the states joined to it, without deriving a gauge group in Julia.
 
 ## Sample output captured
 

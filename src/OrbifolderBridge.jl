@@ -12,6 +12,8 @@ export split_transcript, output_for, parse_rational, parse_rational_vector
 export GaugeGroup, SpectrumField, Spectrum, FieldID, Sector, FieldLocalization
 export GaugeFactorEmbedding, ExactGaugeData
 export DetailedField, DetailedSpectrum, Twist, ShiftVector, WilsonLine, WilsonLines
+export SpaceGroupElement, SpaceGroupInfo, SpaceGroupMetadata, GeometryParseError
+export Localization, LocalGaugeData
 export VEVConfigurationRef, VEVConfigurationSummary, GaugeSector
 export VEVAssignment, FieldVEV, VEVConfigurationSpec, VEVConfigurationResult
 export VEVConfigurationError, parse_vev_configurations, parse_gauge_sector, parse_field_vevs
@@ -20,6 +22,7 @@ export parse_gauge_group, parse_spectrum, parse_detailed_spectrum, find_fields
 export parse_exact_gauge_data, compute_exact_gauge_data
 export GaugeEmbeddingComparison, compare_gauge_embeddings
 export parse_twist, parse_shift_vectors, parse_wilson_lines
+export parse_available_space_groups, parse_space_group_metadata
 export algebra_to_cartan_type
 export dual_weight, find_weight_of_dimension, representation_weight
 export gauge_group_root_systems, field_weights
@@ -48,6 +51,8 @@ export ConsistencyResult, check_consistency, is_consistent
 export check_consistency_batch, partition_consistent_models
 export compute_gauge_group, compute_spectrum, compute_detailed_spectrum
 export compute_twist, compute_shift_vectors, compute_wilson_lines
+export available_space_groups, space_group_metadata
+export localizations, compute_localizations, fields_at, local_gauge_data
 export compute_spectra, compute_gauge_groups, compute_twists
 export compute_shift_vectors_batch, compute_wilson_lines_batch
 
@@ -60,6 +65,7 @@ include("core/transcript.jl")
 include("core/types.jl")
 include("core/parsers.jl")
 include("core/model.jl")
+include("core/geometry.jl")
 include("core/configuration.jl")
 include("core/exact_gauge.jl")
 include("core/consistency.jl")

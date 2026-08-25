@@ -47,6 +47,14 @@ second is the compactification ``\mathbb Z_3`` embedding. See
 [Models and Geometry](@ref) for the input conventions and for inspecting the
 twist, shifts, and Wilson lines reported by upstream.
 
+Compatible Geometry alternatives and the selected space-group metadata also
+come directly from upstream:
+
+```julia
+available_space_groups(model)
+space_group_metadata(model)
+```
+
 Before a more expensive calculation, ask upstream to validate the model:
 
 ```julia

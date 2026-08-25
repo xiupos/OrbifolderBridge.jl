@@ -58,6 +58,26 @@ existing grouped [`Spectrum`](@ref) alongside individually identified
 This design prevents multiplicity expansion, relabeling, or a configuration
 change from breaking references held by coupling and mass-matrix results.
 
+### Geometry and localization
+
+Compatible space groups are enumerated through upstream's own catalogue
+command. The bridge records point-group orders, the compactification
+root-lattice label, the selected Geometry file, and the generators upstream
+prints. It does not reconstruct conjugacy classes, fixed sets, centralizers,
+or other Geometry-engine results from the file contents.
+
+SUSY and non-SUSY Geometry trees share the 138 supported filenames but not the
+same grammar: non-SUSY adds the Witten twist coordinate. Consequently a
+`SpaceGroupElement` contains a backend-shaped `Sector` and a common six-entry
+translation, and catalogue entries retain their backend identity.
+
+Field localizations are grouped by the complete constructing element together
+with upstream's fixed-point/fixed-brane label and exact local shift. The
+result links stable `FieldID`s to that location. Since the supported prompt
+does not provide a stable local-gauge-group result, `LocalGaugeData` exposes
+the authoritative local shift and localized states without deriving a group
+in Julia.
+
 ### VEV configuration
 
 Any result that depends on a VEV configuration must make that configuration
