@@ -9,6 +9,7 @@ using OrbifolderBridge
     include("test_exact_gauge.jl")
     include("test_model.jl")
     include("test_geometry.jl")
+    include("test_analysis.jl")
     include("test_configuration.jl")
     include("test_generation.jl")
     include("test_couplings.jl")

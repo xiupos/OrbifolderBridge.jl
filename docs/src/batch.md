@@ -75,6 +75,11 @@ The available batch functions mirror the inexpensive single-model operations.
 Detailed spectra currently use the single-model API because their upstream
 transcripts are substantially larger.
 
+When several results are needed for every model, [`analyze_batch`](@ref)
+launches one integrated upstream process per model instead of one process per
+result type. See [Integrated and Reproducible Analysis](@ref) for supported
+items and provenance.
+
 ```@docs
 compute_spectra
 compute_gauge_groups

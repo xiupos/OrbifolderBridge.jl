@@ -6,6 +6,7 @@ version = "1.0.0-DEV"
 [deps]
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [compat]
 julia = "1.10.10"

@@ -249,14 +249,26 @@ Computed values should be traceable to:
 - executed commands;
 - warnings and raw transcript.
 
-This metadata is best carried by a common result wrapper or analysis result,
-rather than duplicated in every small value type. Plain parsed values should
-remain convenient to compare and test.
+[`ComputationContext`](@ref) fixes the model, validated backend, explicit VEV
+configuration, and timeout. [`analyze`](@ref) returns the requested plain
+parsed values in an [`AnalysisResult`](@ref), with one shared
+[`AnalysisProvenance`](@ref) rather than duplicating metadata in every small
+value type. The model identity is the SHA-256 of its exact rendered upstream
+input; the Geometry identity combines the selected filename with the SHA-256
+of that file's contents. This scopes stable field identifiers across saved
+analyses and detects a changed Geometry definition under the same filename.
+
+The integrated command planner coalesces read-only dependencies. A detailed
+spectrum supplies its summary and localization data, while exact gauge data
+reuses the same gauge-group and spectrum blocks. Coupling generation, mass
+matrices, random generation, and declarative configuration materialization
+retain dedicated APIs because their child-process, artifact, or state-mutation
+protocols are not equivalent to a read-only query.
 
 ## API evolution
 
 Prefer small composable queries such as `compute_spectrum` for common work and
-an integrated `analyze` operation when several related results must share a
+the integrated `analyze` operation when several related results must share a
 single configuration and transcript. Existing low-level functions should
 remain available where practical, but new public APIs should not expose prompt
 paths or backend-specific file handling.

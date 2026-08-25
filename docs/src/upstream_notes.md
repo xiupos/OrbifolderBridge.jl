@@ -400,6 +400,24 @@ body is commented out in 1.2.1; it is not a usable source of a local gauge
 group. Phase 8 therefore retains the `V_loc` printed by the fixed-point
 summary and the states joined to it, without deriving a gauge group in Julia.
 
+## Integrated read-only command sequences
+
+The model, gauge-group, spectrum, and Geometry print commands can be issued
+sequentially after one model load in both supported backends. Directory
+changes do not invalidate the selected VEV configuration. Phase 9 therefore
+groups requested `print twist`, `print shift`, `print Wilson lines`, `print
+point group`, and `print space group` commands in the model directory; exact
+gauge commands in the gauge-group directory; and summary/internal-field/fixed-
+point commands in the spectrum directory. A selected configuration is applied
+once before those groups.
+
+Real-backend checks against SUSY 1.2.1 and non-SUSY 1.0 confirmed that this
+combined transcript retains the same grammar as the smaller captured
+transcripts. Coupling creation, mass matrices, generation, and configuration
+materialization are not appended to this sequence: they start child jobs,
+produce side files, or mutate process-local state and keep their specialized
+execution protocols.
+
 ## Sample output captured
 
 Saved to `test/fixtures/`:
