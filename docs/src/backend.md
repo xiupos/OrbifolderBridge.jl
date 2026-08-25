@@ -68,7 +68,7 @@ version comparisons:
 ```julia
 info = backend_info(:nonsusy)
 supports(info, :detailed_spectrum)       # true
-supports(info, :effective_couplings)     # false in the current bridge
+supports(info, :couplings)               # false: no non-SUSY coupling engine
 ```
 
 The capability set also records backend-specific differences. In particular,

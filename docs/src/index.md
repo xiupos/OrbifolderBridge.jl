@@ -87,8 +87,8 @@ binary; override with `ORBIFOLDER_GEOMETRY_DIR`/`NONSUSYORBIFOLDER_GEOMETRY_DIR`
 ```julia
 using OrbifolderBridge
 
-# A Z3 orbifold on the E8xE8 lattice (point group "Z3_1_1", shipped as
-# Geometry/Geometry_Z3_1_1.txt in both backends' source trees).
+# A Z3 orbifold on the E8xE8 lattice (space group "Z3_1_1", point group Z3,
+# shipped as Geometry/Geometry_Z3_1_1.txt in both backends' source trees).
 model = OrbifolderModel(;
     mode = :nonsusy,
     label = "Z3_1_1",

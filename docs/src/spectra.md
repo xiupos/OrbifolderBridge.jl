@@ -96,7 +96,7 @@ fixed brane:
 locations = localizations(detailed)
 location = first(locations)
 states = fields_at(location, detailed)
-local = local_gauge_data(location, detailed)
+local_data = local_gauge_data(location, detailed)
 ```
 
 [`Localization`](@ref) is keyed by the complete constructing element, not by

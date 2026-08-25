@@ -36,7 +36,13 @@ _launch_count(dir) =
             @test supports(info, :detailed_spectrum)
             @test supports(info, :field_vevs)
             @test supports(info, :unbroken_gauge_group)
-            @test !supports(info, :effective_couplings)
+            # supports() is a membership test over a fixed tuple, so any
+            # symbol outside the table is silently false -- which is how an
+            # earlier assertion here passed while naming a capability
+            # (:effective_couplings) that was never in the table at all.
+            # :flatness_analysis is an explicit ROADMAP non-goal, asserted
+            # here only to pin that fail-closed behaviour deliberately.
+            @test !supports(info, :flatness_analysis)
 
             result = check_backend(:susy)
             @test result.ok
