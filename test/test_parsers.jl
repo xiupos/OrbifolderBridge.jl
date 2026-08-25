@@ -98,12 +98,26 @@ end
 end
 
 @testset "parse spectrum after hiding all U(1) factors" begin
+    # Real nonSUSYorbifolder 1.0 output for the guide's Z3_1_1 model
+    # (fixtures/nonsusy/modelZ3_1_1.txt) after `create config(BridgeConfig1)
+    # from(TestConfig1)` and `select observable sector: gauge group(1,3) no
+    # U1s`, which hides SU(3) and every U(1). Rows that differed only in the
+    # now-hidden SU(3) merge, with the hidden factor's dimension folded into
+    # the multiplicity. Against z3_1_1_summary.txt's scalars that is
+    # 3x(10,3)+27x(10,1) -> 9+27 = 36 and
+    # 3x(1,3)+27x(1,1)+81x(1,-3) -> 9+27+243 = 279; the fermions likewise
+    # give 1+3x3+27 = 37 and 3x3+27 = 36.
     text = read(joinpath(@__DIR__, "fixtures", "nonsusy", "derived_summary.txt"), String)
     spectrum = parse_spectrum(text)
     @test spectrum.gauge_group == GaugeGroup("BridgeConfig1", ["SO(10)", "SO(16)"], 0)
     @test spectrum.fields == [
         SpectrumField(36, [10, 1], :s, Rational{Int}[]),
-        SpectrumField(3, [1, 1], :s, Rational{Int}[]),
+        SpectrumField(279, [1, 1], :s, Rational{Int}[]),
+        SpectrumField(37, [16, 1], :f, Rational{Int}[]),
+        SpectrumField(1, [1, -128], :f, Rational{Int}[]),
+        SpectrumField(1, [-16, 1], :f, Rational{Int}[]),
+        SpectrumField(1, [10, 16], :f, Rational{Int}[]),
+        SpectrumField(36, [1, 16], :f, Rational{Int}[]),
     ]
 end
 

@@ -1,4 +1,10 @@
   Gauge group in vev-configuration "BridgeConfig1": SO(10) x SO(16)
 
-   36 ( 10,  1)_s
-    3 (  1,  1)_s
+   36 ( 10,  1)_s 
+  279 (  1,  1)_s 
+
+   37 ( 16,  1)_f 
+    1 (  1,-128)_f 
+    1 (-16,  1)_f 
+    1 ( 10, 16)_f 
+   36 (  1, 16)_f 
