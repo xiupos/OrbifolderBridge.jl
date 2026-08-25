@@ -1,6 +1,7 @@
 module OrbifolderBridge
 
 using Oscar
+using SHA
 
 export orbifolder_binary, set_orbifolder_binary!
 export orbifolder_geometry_dir, set_orbifolder_geometry_dir!
@@ -53,6 +54,8 @@ export compute_gauge_group, compute_spectrum, compute_detailed_spectrum
 export compute_twist, compute_shift_vectors, compute_wilson_lines
 export available_space_groups, space_group_metadata
 export localizations, compute_localizations, fields_at, local_gauge_data
+export ComputationContext, GeometryIdentity, AnalysisProvenance, AnalysisResult
+export AnalysisParseError, analyze, analyze_batch
 export compute_spectra, compute_gauge_groups, compute_twists
 export compute_shift_vectors_batch, compute_wilson_lines_batch
 
@@ -68,6 +71,7 @@ include("core/model.jl")
 include("core/geometry.jl")
 include("core/configuration.jl")
 include("core/exact_gauge.jl")
+include("core/analysis.jl")
 include("core/consistency.jl")
 include("core/generation.jl")
 include("core/couplings.jl")

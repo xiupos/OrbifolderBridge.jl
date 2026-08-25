@@ -183,14 +183,24 @@ commented out in SUSY 1.2.1), so the bridge does not infer one from the shift.
 
 ## Phase 9: Integrated and reproducible analysis
 
-- [ ] **`[bridge]`** Introduce a computation context containing model, backend,
+- [x] **`[bridge]`** Introduce a computation context containing model, backend,
       configuration, and execution options.
-- [ ] **`[bridge]`** Add an `analyze` API that obtains related results in one upstream run.
-- [ ] **`[bridge]`** Record backend version, model-input hash, Geometry identity, commands,
+- [x] **`[bridge]`** Add an `analyze` API that obtains related results in one upstream run.
+- [x] **`[bridge]`** Record backend version, model-input hash, Geometry identity, commands,
       warnings, and raw transcript as provenance.
-- [ ] **`[bridge]`** Extend batch APIs to integrated analyses.
-- [ ] **`[bridge]`** Avoid repeated subprocess launches when several results can be parsed
+- [x] **`[bridge]`** Extend batch APIs to integrated analyses.
+- [x] **`[bridge]`** Avoid repeated subprocess launches when several results can be parsed
       from one transcript.
+
+`analyze` coalesces read-only model, gauge, spectrum, exact-gauge, Geometry,
+and localization queries into one deterministic command plan. Result
+dependencies are reused rather than printed twice, and a common provenance
+record scopes stable field identifiers to cryptographic model and Geometry
+identities. Integrated batches retain input order while running one isolated
+upstream process per model. Stateful coupling, mass-matrix, random-generation,
+and declarative configuration-materialization workflows retain their dedicated
+APIs because their child processes and generated artifacts do not share this
+read-only protocol.
 
 ## Ongoing work
 

@@ -22,6 +22,7 @@ makedocs(;
             "Model Classification and Generation" => "generation.md",
             "Couplings and the Superpotential" => "couplings.md",
             "Mass Matrices" => "mass_matrices.md",
+            "Integrated Analysis" => "analysis.md",
             "OSCAR Integration" => "oscar.md",
             "Consistency and Batch Workflows" => "batch.md",
         ],

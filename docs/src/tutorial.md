@@ -123,6 +123,8 @@ in reconstructing a highest weight from a printed representation dimension.
   with stable field references.
 - [OSCAR Integration](@ref): root systems, weights, and dual representations.
 - [Consistency and Batch Workflows](@ref): validation and concurrent scans.
+- [Integrated and Reproducible Analysis](@ref): related results from one
+  upstream run with shared hashes, commands, warnings, and transcript.
 - [VEV Configurations](@ref): explicit selection, replayable derived
   configurations, fixed SUSY VEVs, and observable/hidden sectors.
 - [Backend Configuration](@ref): binary discovery, low-level execution,
