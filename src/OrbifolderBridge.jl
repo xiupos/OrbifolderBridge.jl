@@ -32,6 +32,7 @@ export compute_twist, compute_shift_vectors, compute_wilson_lines
 export compute_spectra, compute_gauge_groups, compute_twists
 export compute_shift_vectors_batch, compute_wilson_lines_batch
 
+include("core/equality.jl")
 include("core/binaries.jl")
 include("core/process.jl")
 include("core/backend.jl")

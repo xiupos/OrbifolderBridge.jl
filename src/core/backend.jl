@@ -34,21 +34,7 @@ struct BackendInfo
     geometry_dir::String
     capabilities::Tuple{Vararg{Symbol}}
 end
-
-function Base.:(==)(a::BackendInfo, b::BackendInfo)
-    return a.kind === b.kind &&
-           a.version == b.version &&
-           a.binary == b.binary &&
-           a.geometry_dir == b.geometry_dir &&
-           a.capabilities == b.capabilities
-end
-
-function Base.hash(info::BackendInfo, h::UInt)
-    return hash(
-        (info.kind, info.version, info.binary, info.geometry_dir, info.capabilities),
-        h,
-    )
-end
+@structural_equality BackendInfo
 
 """
     BackendCompatibilityError <: Exception
@@ -78,6 +64,7 @@ struct BackendSelfTest
     message::String
     output::String
 end
+@structural_equality BackendSelfTest
 
 function _parse_backend_banner(output::AbstractString)
     kind = if occursin(r"(?i)Non-SUSY Orbifolder", output)
@@ -112,8 +99,9 @@ function _validate_backend_output(expected_kind::Symbol, output::AbstractString)
 end
 
 function _check_backend_paths(mode::Symbol)
-    binary = abspath(orbifolder_binary(mode))
-    geometry_dir = abspath(orbifolder_geometry_dir(mode))
+    # Both resolvers return absolute paths; see orbifolder_binary.
+    binary = orbifolder_binary(mode)
+    geometry_dir = orbifolder_geometry_dir(mode)
     (stat(binary).mode & 0o111) != 0 ||
         throw(BackendCompatibilityError("configured binary is not executable: $binary", ""))
     any(name -> startswith(name, "Geometry_") && endswith(name, ".txt"), readdir(geometry_dir)) ||
@@ -143,20 +131,52 @@ function _probe_backend(mode::Symbol, binary::AbstractString, geometry_dir::Abst
     end
 end
 
+# Probing the backend costs a full subprocess launch, and every public
+# operation preflights through backend_info before doing its real work. Cache
+# successful probes so a computation launches the binary once rather than
+# twice, and a batch of N models launches it N times rather than 2N. The key
+# includes the binary's mtime so a rebuilt backend is re-probed. Only
+# successes are cached: a failure must stay reproducible on the next call.
+const _BACKEND_INFO_CACHE = Dict{Tuple{Symbol,String,String,Float64},BackendInfo}()
+const _BACKEND_INFO_CACHE_LOCK = ReentrantLock()
+
+function _clear_backend_info_cache!()
+    lock(_BACKEND_INFO_CACHE_LOCK) do
+        empty!(_BACKEND_INFO_CACHE)
+    end
+    return nothing
+end
+
 """
-    backend_info(mode::Symbol; timeout::Real = 30) -> BackendInfo
+    backend_info(mode::Symbol; timeout::Real = 30, refresh::Bool = false) -> BackendInfo
 
 Inspect and validate the configured upstream executable and `Geometry/`
 directory. The executable is run through the same isolated script protocol as
 normal computations. Unknown backend kinds and output versions fail with
 [`BackendCompatibilityError`](@ref).
+
+The configured paths, the executable bit, and the `Geometry/` inventory are
+re-checked on every call, but a successful probe is cached per binary path and
+modification time. Pass `refresh = true` to force the subprocess probe to run
+again.
 """
-function backend_info(mode::Symbol; timeout::Real = 30)
+function backend_info(mode::Symbol; timeout::Real = 30, refresh::Bool = false)
     _check_mode(mode)
     binary, geometry_dir = _check_backend_paths(mode)
+    key = (mode, binary, geometry_dir, mtime(binary))
+    if !refresh
+        cached = lock(_BACKEND_INFO_CACHE_LOCK) do
+            get(_BACKEND_INFO_CACHE, key, nothing)
+        end
+        cached === nothing || return cached
+    end
     output = _probe_backend(mode, binary, geometry_dir; timeout = timeout)
     version = _validate_backend_output(mode, output)
-    return BackendInfo(mode, version, binary, geometry_dir, _BACKEND_CAPABILITIES[(mode, version)])
+    info = BackendInfo(mode, version, binary, geometry_dir, _BACKEND_CAPABILITIES[(mode, version)])
+    lock(_BACKEND_INFO_CACHE_LOCK) do
+        _BACKEND_INFO_CACHE[key] = info
+    end
+    return info
 end
 
 """
@@ -172,10 +192,13 @@ supports(info::BackendInfo, capability::Symbol) = capability in info.capabilitie
 Run a lightweight backend self-test using the real isolated script protocol.
 Unlike [`backend_info`](@ref), expected configuration, process, and
 compatibility failures are returned as a structured result.
+
+This is a diagnostic, so it always re-probes the executable rather than
+reusing a cached [`backend_info`](@ref) result.
 """
 function check_backend(mode::Symbol; timeout::Real = 30)
     try
-        info = backend_info(mode; timeout = timeout)
+        info = backend_info(mode; timeout = timeout, refresh = true)
         return BackendSelfTest(info, true, "backend is compatible", "")
     catch e
         e isa InterruptException && rethrow()

@@ -16,6 +16,7 @@ struct GaugeGroup
     nonabelian::Vector{String}
     n_u1::Int
 end
+@structural_equality GaugeGroup
 
 """
     SpectrumField
@@ -34,6 +35,7 @@ struct SpectrumField
     statistic::Symbol
     charges::Vector{Rational{Int}}
 end
+@structural_equality SpectrumField
 
 """
     Spectrum
@@ -52,6 +54,7 @@ struct Spectrum
     anomalous_tr_q::Union{Nothing,Float64}
     fields::Vector{SpectrumField}
 end
+@structural_equality Spectrum
 
 """
     FieldID
@@ -64,6 +67,7 @@ scoped to one orbifold model and backend field basis.
 struct FieldID
     number::Int
 end
+@structural_equality FieldID
 
 """
     Sector
@@ -75,6 +79,7 @@ three `(k,m,n)` coordinates (including its Witten-twist coordinate).
 struct Sector
     coordinates::Vector{Int}
 end
+@structural_equality Sector
 
 """
     FieldLocalization
@@ -89,6 +94,7 @@ struct FieldLocalization
     translation::Vector{Rational{Int}}
     local_shift::Vector{Rational{Int}}
 end
+@structural_equality FieldLocalization
 
 """
     DetailedField
@@ -112,6 +118,7 @@ struct DetailedField
     r_charges::Vector{Rational{Int}}
     right_moving_momentum::Vector{Rational{Int}}
 end
+@structural_equality DetailedField
 
 """
     DetailedSpectrum
@@ -123,6 +130,7 @@ struct DetailedSpectrum
     summary::Spectrum
     fields::Vector{DetailedField}
 end
+@structural_equality DetailedSpectrum
 
 """
     Twist
@@ -133,6 +141,7 @@ point groups) of the orbifold's point group, as 4D vectors (`print twist`).
 struct Twist
     vectors::Vector{Vector{Rational{Int}}}
 end
+@structural_equality Twist
 
 """
     ShiftVector
@@ -144,6 +153,7 @@ struct ShiftVector
     label::String
     vector::Vector{Rational{Int}}
 end
+@structural_equality ShiftVector
 
 """
     WilsonLine
@@ -154,6 +164,7 @@ struct WilsonLine
     label::String
     vector::Vector{Rational{Int}}
 end
+@structural_equality WilsonLine
 
 """
     WilsonLines
@@ -172,6 +183,7 @@ struct WilsonLines
     identifications::Vector{Tuple{String,String}}
     orders::Vector{Int}
 end
+@structural_equality WilsonLines
 
 """
     VEVConfigurationRef(label)
@@ -192,6 +204,7 @@ struct VEVConfigurationRef
         return new(value)
     end
 end
+@structural_equality VEVConfigurationRef
 
 """
     VEVConfigurationSummary
@@ -208,6 +221,7 @@ struct VEVConfigurationSummary
     label_count::Int
     fields_with_vev::Vector{String}
 end
+@structural_equality VEVConfigurationSummary
 
 """
     GaugeSector
@@ -223,6 +237,7 @@ struct GaugeSector
     observable_u1::Vector{Int}
     hidden_u1::Vector{Int}
 end
+@structural_equality GaugeSector
 
 """
     VEVAssignment(field, value)
@@ -242,6 +257,7 @@ struct VEVAssignment
         return new(field, converted)
     end
 end
+@structural_equality VEVAssignment
 
 """
     FieldVEV
@@ -254,6 +270,7 @@ struct FieldVEV
     label::String
     value::Float64
 end
+@structural_equality FieldVEV
 
 """
     VEVConfigurationSpec
@@ -271,6 +288,7 @@ struct VEVConfigurationSpec
     assignments::Vector{VEVAssignment}
     recompute_unbroken_group::Bool
 end
+@structural_equality VEVConfigurationSpec
 
 function VEVConfigurationSpec(;
     name::AbstractString,
@@ -322,6 +340,7 @@ struct VEVConfigurationResult
     resolution_transcript::String
     transcript::String
 end
+@structural_equality VEVConfigurationResult
 
 """
     VEVConfigurationError <: Exception
@@ -337,18 +356,3 @@ end
 
 Base.showerror(io::IO, e::VEVConfigurationError) =
     print(io, "VEVConfigurationError: ", e.message)
-
-# These are plain value types (parsed data, not identity-bearing objects), so
-# equality/hashing should be structural rather than Julia's default identity
-# fallback for non-isbits structs.
-for T in (
-    :GaugeGroup, :SpectrumField, :Spectrum, :FieldID, :Sector, :FieldLocalization,
-    :DetailedField, :DetailedSpectrum, :Twist, :ShiftVector, :WilsonLine, :WilsonLines,
-    :VEVConfigurationRef, :VEVConfigurationSummary, :GaugeSector,
-    :VEVAssignment, :FieldVEV, :VEVConfigurationSpec, :VEVConfigurationResult,
-)
-    @eval begin
-        Base.:(==)(a::$T, b::$T) = all(getfield(a, f) == getfield(b, f) for f in fieldnames($T))
-        Base.hash(a::$T, h::UInt) = hash(ntuple(i -> getfield(a, i), fieldcount($T)), hash($T, h))
-    end
-end

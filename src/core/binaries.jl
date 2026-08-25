@@ -23,6 +23,11 @@ Resolution order: the environment variable (`ORBIFOLDER_BIN` /
 `NONSUSYORBIFOLDER_BIN`), then a `Preferences.jl` setting stored via
 [`set_orbifolder_binary!`](@ref), then a bare executable name on `PATH`.
 
+The returned path is always absolute. Every backend invocation runs in its own
+temporary working directory, so a relative path configured against the caller's
+current directory would otherwise be resolved against that temporary directory
+and fail to spawn.
+
 Throws an `ErrorException` with build instructions if no usable binary is found.
 See `docs/src/upstream_notes.md` for how to build the upstream tools.
 """
@@ -41,7 +46,9 @@ function orbifolder_binary(mode::Symbol)
             "set_orbifolder_binary!(:$mode, \"/path/to/binary\")."
         )
     end
-    return path
+    # Deliberately abspath rather than normpath: a `..` component may traverse a
+    # symlinked source tree, where lexical normalization would change meaning.
+    return abspath(path)
 end
 
 """
@@ -70,6 +77,9 @@ Resolution order: the environment variable (`ORBIFOLDER_GEOMETRY_DIR` /
 [`orbifolder_binary`](@ref)`(mode)` (checking both the binary's own directory
 and its parent, since the SUSY binary lives in `src/orbifolder/` under the
 source tree while `Geometry/` sits at the tree root).
+
+The returned path is always absolute, because it is symlinked into the
+temporary working directory of each backend invocation.
 """
 function orbifolder_geometry_dir(mode::Symbol)
     _check_mode(mode)
@@ -99,7 +109,7 @@ function orbifolder_geometry_dir(mode::Symbol)
             "set_orbifolder_geometry_dir!(:$mode, \"/path/to/Geometry\")."
         )
     end
-    return dir
+    return abspath(dir)
 end
 
 """
