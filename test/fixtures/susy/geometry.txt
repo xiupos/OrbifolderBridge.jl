@@ -1,0 +1,4 @@
+  available Z_3 x Z_3 space groups:
+     # | lattice         | additional label   | geometry file
+     1 | Z3xZ3_1         |                    | "Geometry/Geometry_Z3xZ3_1_1.txt"
+     2 | Z3xZ3_3         | roto-translation   | "Geometry/Geometry_Z3xZ3_3_1.txt"

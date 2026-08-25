@@ -1,0 +1,8 @@
+  Point group is Z_3.
+---SPACE---
+  Space group based on Z_3 point group and root-lattice of Z3_1.
+  Generators are:
+
+  (1, 0, 0) (    0,     0,     0,     0,     0,     0),
+  (0, 1, 0) (    0,     0,     0,     0,     0,     0),
+  (0, 0, 0) (    1,     0,     0,     0,     0,     0)

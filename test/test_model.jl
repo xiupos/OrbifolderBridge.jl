@@ -81,6 +81,12 @@ end
             detailed = compute_detailed_spectrum(m)
             @test length(detailed.fields) == sum(f.multiplicity for f in spec.fields)
             @test detailed.summary == spec
+            @test length(available_space_groups(m)) == 1
+            geometry = space_group_metadata(m)
+            @test geometry.point_group_orders == [3]
+            @test geometry.lattice_label == "Z3_1"
+            @test length(geometry.generators) == 8
+            @test sum(length(loc.fields) for loc in localizations(detailed)) == length(detailed.fields)
             configs = list_vev_configurations(m)
             @test getfield.(getfield.(configs, :configuration), :label) ==
                   ["StandardConfig1", "TestConfig1"]
@@ -126,6 +132,12 @@ end
             detailed = compute_detailed_spectrum(m)
             @test length(detailed.fields) == sum(f.multiplicity for f in spec.fields)
             @test detailed.summary == spec
+            @test length(available_space_groups(m)) == 15
+            geometry = space_group_metadata(m)
+            @test geometry.point_group_orders == [3, 3]
+            @test geometry.lattice_label == "Z3xZ3_1"
+            @test length(geometry.generators) == 8
+            @test sum(length(loc.fields) for loc in localizations(detailed)) == length(detailed.fields)
             configs = list_vev_configurations(m)
             @test getfield.(getfield.(configs, :configuration), :label) ==
                   ["StandardConfig1", "TestConfig1"]

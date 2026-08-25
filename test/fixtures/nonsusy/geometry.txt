@@ -1,0 +1,3 @@
+  available Z_3 space groups:
+     # | lattice         | additional label   | geometry file
+     1 | Z3_1            |                    | "Geometry/Geometry_Z3_1_1.txt"

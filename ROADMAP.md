@@ -164,14 +164,22 @@ non-SUSY 1.0 has no coupling or mass-matrix implementation.
 
 ## Phase 8: Geometry and localization
 
-- [ ] **`[upstream]`** Enumerate available compatible space groups.
-- [ ] **`[upstream]`** Expose point-group and lattice metadata.
-- [ ] **`[investigate]`** Represent sectors, fixed points, fixed tori, and constructing elements
+- [x] **`[upstream]`** Enumerate available compatible space groups.
+- [x] **`[upstream]`** Expose point-group and lattice metadata.
+- [x] **`[investigate]`** Represent sectors, fixed points, fixed tori, and constructing elements
       beyond the detailed-spectrum data already exposed.
-- [ ] **`[bridge]`** Connect localized states to their local gauge data.
+- [x] **`[bridge]`** Connect localized states to their local gauge data.
 
 The goal is structured access to upstream results, not a second implementation
 of the Geometry-file engine.
+
+The bridge now parses upstream's compatible-space-group table and selected
+space-group description, retaining backend-specific sector arity and exact
+generator translations. Detailed fields are grouped into fixed-point or
+fixed-brane `Localization` values keyed by complete constructing elements and
+linked through stable `FieldID`s to upstream's exact `V_loc`. The supported
+prompt exposes no stable local-gauge-group result (`print local matter` is
+commented out in SUSY 1.2.1), so the bridge does not infer one from the shift.
 
 ## Phase 9: Integrated and reproducible analysis
 

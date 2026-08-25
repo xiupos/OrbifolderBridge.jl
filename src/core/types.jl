@@ -81,6 +81,35 @@ struct Sector
 end
 @structural_equality Sector
 
+"""A constructing space-group element as reported by upstream."""
+struct SpaceGroupElement
+    sector::Sector
+    translation::Vector{Rational{Int}}
+end
+@structural_equality SpaceGroupElement
+
+"""One upstream-listed Geometry file compatible with a point group."""
+struct SpaceGroupInfo
+    backend::Symbol
+    index::Int
+    point_group_orders::Vector{Int}
+    lattice_label::String
+    additional_label::String
+    geometry_file::String
+end
+@structural_equality SpaceGroupInfo
+
+"""Metadata reported by upstream for the selected space group."""
+struct SpaceGroupMetadata
+    backend::Symbol
+    point_group_orders::Vector{Int}
+    lattice_label::String
+    additional_label::String
+    geometry_file::String
+    generators::Vector{SpaceGroupElement}
+end
+@structural_equality SpaceGroupMetadata
+
 """
     FieldLocalization
 
@@ -131,6 +160,27 @@ struct DetailedSpectrum
     fields::Vector{DetailedField}
 end
 @structural_equality DetailedSpectrum
+
+"""
+    Localization
+
+A fixed point or fixed brane, identified by its complete constructing element,
+with its exact local shift and stable field identifiers.
+"""
+struct Localization
+    label::String
+    constructing_element::SpaceGroupElement
+    local_shift::Vector{Rational{Int}}
+    fields::Vector{FieldID}
+end
+@structural_equality Localization
+
+"""Upstream local shift and detailed states at one localization."""
+struct LocalGaugeData
+    localization::Localization
+    fields::Vector{DetailedField}
+end
+@structural_equality LocalGaugeData
 
 """
     Twist
