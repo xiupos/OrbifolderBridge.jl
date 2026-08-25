@@ -4,7 +4,19 @@ on:
     branches:
       - main
     tags: ['*']
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'Project.toml'
+      - 'Manifest.toml'
+      - '.github/workflows/CI.yml'
   pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'Project.toml'
+      - 'Manifest.toml'
+      - '.github/workflows/CI.yml'
   workflow_dispatch:
 concurrency:
   # Skip intermediate builds: always.
