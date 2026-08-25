@@ -5,9 +5,10 @@ CurrentModule = OrbifolderBridge
 # Models and Geometry
 
 An [`OrbifolderModel`](@ref) describes the data needed by upstream to construct
-a heterotic orbifold model: a space group, a ten-dimensional gauge lattice,
-up to three shift vectors, and six Wilson-line slots. It is an input value,
-not a cached upstream session.
+a heterotic orbifold model: a space group, a 16-dimensional gauge lattice
+(``E_8 \times E_8`` or ``\mathrm{Spin}(32)/\mathbb Z_2``), up to three shift
+vectors, and six Wilson-line slots. It is an input value, not a cached
+upstream session.
 
 ## Constructing a model
 
@@ -61,7 +62,12 @@ twist.vectors
 ```
 
 [`Twist`](@ref) contains one four-dimensional rational vector for a cyclic
-point group and two for a product point group.
+point group and two for a product point group. Its last three entries are the
+twist angles (in units of ``2\pi``) of the three complexified compact
+directions. The leading entry is not a fourth compact direction: upstream's
+`CTwistVector` documents it as "should be zero", and every shipped Geometry
+file keeps it there, but it is a genuine slot that `UpdateData` includes when
+summing the zero-point energy rather than a value the class forces to zero.
 
 ```@docs
 compute_twist

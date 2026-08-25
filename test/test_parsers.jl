@@ -164,19 +164,35 @@ end
     field_output = output_for(susy_pairs, "print(*) with internal information")
     @test_throws ErrorException OrbifolderBridge._parse_field_details(replace(field_output, "field no." => "field index"; count = 1))
 
+    # Partly synthetic grammar-coverage block. Real gauge-boson blocks are
+    # obtainable -- `print(*) vector with internal information` prints them,
+    # though the bridge itself only ever issues the unqualified `print(*)`,
+    # which FindSUSYType defaults to LeftChiral for an N=1 model -- and the
+    # untwisted sector, zero constructing translation and q_sh = (-1,0,0,0)
+    # below are copied from such a capture (orbifolder 1.2.1, MSSM0, V_1).
+    #
+    # Two parts stay hand-written. `R charges` is only printed when the
+    # Geometry file declares a discrete R symmetry, and no file shipped by
+    # either backend does, so that line cannot be captured at all. The
+    # representation is simplified to a bare `8`: every real gauge boson is
+    # an adjoint, so upstream's PrintSDimension always appends its
+    # AdditionalLabel (`8_adj`), which neither this parser nor parse_spectrum
+    # currently accepts. Replace this with a verbatim capture once that
+    # suffix is supported.
     optional_charges = """
         gauge boson: A_1
-      sector (k,l)        : (1, 2)
-      fixed point n_a     : (0, 1/2, 0, 0, 0, 0)
+      sector (k,l)        : (0, 0)
+      fixed point n_a     : (0, 0, 0, 0, 0, 0)
       space group charges : (1/3, 2/3)
       representation      : ( 8)_v  U(1): ()
-      right-moving q_sh   : (0, 1, 0, 0)
+      right-moving q_sh   : (-1, 0, 0, 0)
       R charges           : (1/3, -1/3)
       field no.           : 42
     """
     charged = only(OrbifolderBridge._parse_field_details(optional_charges))
     @test charged.multiplet_type == :gauge_boson
-    @test charged.constructing_translation == [0, 1 // 2, 0, 0, 0, 0]
+    @test charged.sector == Sector([0, 0])
+    @test charged.constructing_translation == [0, 0, 0, 0, 0, 0]
     @test charged.space_group_charges == [1 // 3, 2 // 3]
     @test charged.r_charges == [1 // 3, -1 // 3]
 end

@@ -34,7 +34,15 @@ result = compute_mass_matrix(model, specification, request)
 result.entries[1, 1]
 ```
 
-The bridge creates the derived configuration, assigns temporary row and
+`rows` and `columns` must be either completely disjoint or exactly equal.
+When they are disjoint, the bridge assigns distinct temporary label families
+(`R`, `C`) and requests upstream's `A_i M_ij B_j`-style matrix. When `rows ==
+columns` — the same-family case used for a Majorana-type mass matrix, such as
+right-handed-neutrino masses — both dimensions share the single `R` family
+and upstream instead prints `R_i M_ij R_j`. Any other overlap is rejected
+before a request reaches upstream, since neither printed form describes it.
+
+The bridge creates the derived configuration, assigns those temporary row and
 column label families, registers each coupling with its own `wait(1)` barrier,
 and requests the matrix in one isolated upstream process. Temporary labels do
 not escape into the result. If upstream automatically transposes a wide
