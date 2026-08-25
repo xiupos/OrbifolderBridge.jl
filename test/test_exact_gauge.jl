@@ -173,7 +173,35 @@ end
     @test fallback.source == :dimension_fallback
     @test fallback.reported_dimension == -3
     @test dim_of_simple_module(factors[2].root_system, fallback.weight) == 3
-    @test_throws ErrorException resolve_representation(factors[3], 128)
+
+    # factors[3] is SO(16) = D_8, whose 128/128' half-spin pair is two
+    # distinct self-dual representations of equal dimension. Upstream's sign
+    # picks between them, so dimension fallback must follow that convention
+    # rather than rejecting the pair as ambiguous, and must agree with
+    # `representation_weight`.
+    spin_pos = resolve_representation(factors[3], 128)
+    spin_neg = resolve_representation(factors[3], -128)
+    @test spin_pos.source == :dimension_fallback
+    @test spin_neg.source == :dimension_fallback
+    @test spin_pos.weight == fundamental_weight(factors[3].root_system, 8)
+    @test spin_neg.weight == fundamental_weight(factors[3].root_system, 7)
+    @test spin_pos.weight != spin_neg.weight
+    @test dim_of_simple_module(factors[3].root_system, spin_neg.weight) == 128
+
+    # D_4's triality triple is genuinely irrecoverable from a bare dimension
+    # (8_v, 8_s and 8_c are three mutually non-conjugate families, and
+    # upstream prints all three as a plain positive 8), so the ambiguity
+    # rejection must still fire there.
+    d4_roots = [
+        Rational{Int}[1, -1, 0, 0, zeros(Int, 12)...],
+        Rational{Int}[0, 1, -1, 0, zeros(Int, 12)...],
+        Rational{Int}[0, 0, 1, -1, zeros(Int, 12)...],
+        Rational{Int}[0, 0, 1, 1, zeros(Int, 12)...],
+    ]
+    d4 = embedded_gauge_factor(GaugeFactorEmbedding(1, "SO(8)", d4_roots))
+    @test_throws ErrorException resolve_representation(d4, 8)
+    @test_throws ErrorException resolve_representation(d4, -8)
+    @test dim_of_simple_module(d4.root_system, resolve_representation(d4, 28).weight) == 28
 
     field = SpectrumField(1, [10, 3, 1], :s, Rational{Int}[])
     resolved = resolve_field_representations(factors, field)

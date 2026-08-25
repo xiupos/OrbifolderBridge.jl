@@ -48,6 +48,34 @@ end
     @test representation_weight(A2, 1) == WeightLatticeElem(A2, [0, 0])
 end
 
+@testset "D_even half-spin sign convention (D_6, D_8)" begin
+    # D_6's 32/32' and D_8's 128/128' half-spin representations are each
+    # individually self-dual (dual_weight returns the same weight for both),
+    # so upstream's +/- sign cannot mean group-theoretic duality there. It
+    # instead follows CState::DetermineDimension's hard-coded D6_32/D6_32bar
+    # and D8_128/D8_128bar node assignment: the highest-numbered node for the
+    # positive dimension, the adjacent one for the negative dimension.
+    D6 = root_system(:D, 6)
+    @test dual_weight(D6, fundamental_weight(D6, 5)) == fundamental_weight(D6, 5)
+    @test dual_weight(D6, fundamental_weight(D6, 6)) == fundamental_weight(D6, 6)
+    @test representation_weight(D6, 32) == fundamental_weight(D6, 6)
+    @test representation_weight(D6, -32) == fundamental_weight(D6, 5)
+    @test representation_weight(D6, 32) != representation_weight(D6, -32)
+
+    D8 = root_system(:D, 8)
+    @test dual_weight(D8, fundamental_weight(D8, 7)) == fundamental_weight(D8, 7)
+    @test dual_weight(D8, fundamental_weight(D8, 8)) == fundamental_weight(D8, 8)
+    @test representation_weight(D8, 128) == fundamental_weight(D8, 8)
+    @test representation_weight(D8, -128) == fundamental_weight(D8, 7)
+    @test dim_of_simple_module(D8, representation_weight(D8, 128)) == 128
+    @test dim_of_simple_module(D8, representation_weight(D8, -128)) == 128
+    @test representation_weight(D8, 128) != representation_weight(D8, -128)
+
+    # D_5's 16/16' remain genuine (non-self-dual) duals and are unaffected.
+    D5 = root_system(:D, 5)
+    @test representation_weight(D5, -16) == dual_weight(D5, representation_weight(D5, 16))
+end
+
 @testset "gauge_group_root_systems / field_weights against fixtures" begin
     pairs = split_transcript(read(joinpath(@__DIR__, "fixtures", "nonsusy", "z3_1_1_summary.txt"), String))
     spec = parse_spectrum(output_for(pairs, "print summary"))
@@ -61,6 +89,17 @@ end
             @test dim_of_simple_module(R, w) == abs(rep)
         end
     end
+
+    # The fixture's `1 ( 1, 1,-128)_f` row exercises the SO(16) = D_8
+    # half-spin case through field_weights: its D_8 entry must land on the
+    # 128' node, and the opposite sign on the other one. Checking dimensions
+    # alone (as the loop above does) cannot catch a collision here, since
+    # both half-spin representations have dimension 128.
+    minus_field = only(filter(f -> f.rep == [1, 1, -128], spec.fields))
+    @test last(field_weights(Rs, minus_field)) == fundamental_weight(Rs[3], 7)
+    plus_weights = field_weights(Rs, SpectrumField(1, [1, 1, 128], :f, Rational{Int}[]))
+    @test last(plus_weights) == fundamental_weight(Rs[3], 8)
+    @test last(field_weights(Rs, minus_field)) != last(plus_weights)
 
     mismatched = SpectrumField(1, [1, 1], :s, Rational{Int}[])
     @test_throws ArgumentError field_weights(Rs, mismatched)

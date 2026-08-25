@@ -104,9 +104,14 @@ Pass `dynkin_labels` to `resolve_representation` or one label vector per factor
 to `resolve_field_representations` to select the exact path. OSCAR's exact
 Weyl-dimension calculation must agree with every supplied reported dimension;
 a mismatch raises an error. Dimension fallback also rejects dimensions shared
-by multiple non-conjugate highest-weight families. A signed dimension may
-select between one conjugate pair, but it is never used to guess between
-unrelated representations.
+by multiple non-conjugate highest-weight families — `D_4`'s
+`8_v`/`8_s`/`8_c` being the case that actually arises. A signed dimension may
+select between one conjugate pair, or between `D_6`'s `32`/`32'` and `D_8`'s
+`128`/`128'` half-spin pair following upstream's own convention (see
+[Representations as highest weights](@ref)), but it is never used to guess
+between unrelated representations. Both resolution paths apply the same rule,
+so `resolve_representation` and [`representation_weight`](@ref) never disagree
+about a printed dimension.
 
 ## Comparing VEV configurations
 
@@ -174,8 +179,14 @@ weights = field_weights(root_systems, field)
 
 Upstream summary output normally gives signed representation dimensions, not
 Dynkin labels. [`representation_weight`](@ref) searches for a dominant weight
-with the requested absolute dimension; a negative sign selects its dual via
-[`dual_weight`](@ref).
+with the requested absolute dimension; a negative sign normally selects its
+dual via [`dual_weight`](@ref). The exception is `D_6`'s `32`/`32'` and
+`D_8`'s `128`/`128'` half-spin representations: both are individually
+self-dual, so upstream's sign there does not mean group-theoretic duality but
+selects between the two half-spin Dynkin nodes directly, matching upstream's
+own hard-coded convention. `D_4`'s triality-related `8_v`/`8_s`/`8_c` share a
+single positive printed dimension with no sign distinction at all and remain
+ambiguous; supply exact Dynkin labels for that case.
 
 Dimension alone can be ambiguous. [`find_weight_of_dimension`](@ref) therefore
 performs a documented bounded search covering the low-weight representations

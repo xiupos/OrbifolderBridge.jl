@@ -75,6 +75,14 @@ function _weight_candidates_of_dimension(R::RootSystem, dim::Integer; max_coeff:
 end
 
 function _unambiguous_dimension_weight(R::RootSystem, reported::Int)
+    # D_6's 32/32' and D_8's 128/128' are two distinct self-dual half-spin
+    # representations of the same dimension, so the orbit count below would
+    # call them ambiguous. Upstream's sign resolves them, so honour that
+    # convention here exactly as `representation_weight` does; anything it
+    # does not cover (notably D_4's triality triple) still falls through to
+    # the ambiguity rejection.
+    special = _d_even_half_spin_weight(R, reported)
+    special !== nothing && return special
     candidates = _weight_candidates_of_dimension(R, abs(reported))
     isempty(candidates) && return representation_weight(R, reported)
     orbits = Vector{WeightLatticeElem}[]
@@ -91,6 +99,44 @@ function _unambiguous_dimension_weight(R::RootSystem, reported::Int)
     return reported < 0 ? dual_weight(R, representative) : representative
 end
 
+# If `R` is irreducible of type D_n with n even and n in (6, 8) — the
+# half-spin representations upstream's CState::DetermineDimension
+# distinguishes by sign despite both being self-dual — return n. Otherwise
+# return `nothing`.
+#
+# D_4's two 8-dimensional half-spin representations share upstream's plain
+# positive dimension 8 with the vector representation (triality); upstream
+# disambiguates them only through an internal label that the supported
+# prompt does not print, so D_4 is intentionally excluded here: no sign
+# convention can recover the intended representation from a bare dimension.
+function _d_even_half_spin_rank(R::RootSystem)
+    types = cartan_type(cartan_matrix(R))
+    length(types) == 1 || return nothing
+    family, rank = only(types)
+    (family === :D && rank in (6, 8)) || return nothing
+    return rank
+end
+
+# For the D_n (n even) half-spin case identified by `_d_even_half_spin_rank`,
+# return the fundamental weight upstream's sign convention selects for the
+# signed dimension `rep`, matching CState::DetermineDimension's hard-coded
+# D6_32/D6_32bar and D8_128/D8_128bar tables: node n for a positive
+# dimension, node n - 1 for the negative one. These two representations are
+# each self-dual (`dual_weight` returns the same weight for both, since
+# -w_0 = 1 for even D_n), so ordinary duality cannot distinguish upstream's
+# positive and negative labels; only this explicit node correspondence can,
+# and it relies on `embedded_gauge_factor` having already verified that
+# upstream's simple-root numbering matches OSCAR's. Returns `nothing`
+# outside this case, or when abs(rep) does not match the half-spin
+# dimension.
+function _d_even_half_spin_weight(R::RootSystem, rep::Integer)
+    rank = _d_even_half_spin_rank(R)
+    rank === nothing && return nothing
+    spin_dimension = dim_of_simple_module(R, fundamental_weight(R, rank))
+    abs(rep) == spin_dimension || return nothing
+    return fundamental_weight(R, rep > 0 ? rank : rank - 1)
+end
+
 """
     representation_weight(R::RootSystem, rep::Integer) -> WeightLatticeElem
 
@@ -99,8 +145,18 @@ Resolve a single signed representation label as printed in a
 `R`: the magnitude is matched to a representation dimension via
 [`find_weight_of_dimension`](@ref), and a negative sign selects the dual
 (conjugate) representation via [`dual_weight`](@ref).
+
+For `D_6`'s `\\mathbf{32}`/`\\mathbf{32'}` and `D_8`'s
+`\\mathbf{128}`/`\\mathbf{128'}` half-spin representations, upstream's sign
+does not select the group-theoretic dual — both are individually self-dual —
+but the other half-spin node, matching upstream's own hard-coded convention.
+`D_4`'s triality-related `\\mathbf{8}_v`/`\\mathbf{8}_s`/`\\mathbf{8}_c` share a
+single positive printed dimension with no sign distinction and remain
+ambiguous.
 """
 function representation_weight(R::RootSystem, rep::Integer)
+    special = _d_even_half_spin_weight(R, rep)
+    special !== nothing && return special
     w = find_weight_of_dimension(R, abs(rep))
     return rep < 0 ? dual_weight(R, w) : w
 end

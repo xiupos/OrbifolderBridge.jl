@@ -365,16 +365,39 @@ this presentation, then verifies each monomial against the native saved
 ordinary coupling set.
 
 Model definition file format (used by `load orbifolds(...)`), shared by both
-tools:
+tools but with different shift counts. `COrbifoldGroup::LoadOrbifoldGroup`
+always reads exactly the shift vectors below before the six Wilson lines,
+regardless of point group: a missing or reordered shift line desynchronizes
+every following Wilson line instead of failing to load.
+
+SUSY orbifolder reads two shifts:
 
 ```
 begin model
 Label:<name>
 SpaceGroup:Geometry/Geometry_<PointGroup>_<i>_<j>.txt
-Lattice:E8xE8            # or SO32
+Lattice:E8xE8            # or Spin32
 Shifts and Wilsonlines:
 <16 rationals: shift V_1>
-<16 rationals: shift V_2, only for ZMxZN>
+<16 rationals: shift V_2, zero-filled for a cyclic point group>
+<16 rationals: W_1>
+...
+<16 rationals: W_6>
+end model
+```
+
+nonSUSYorbifolder reads three shifts: the Witten ``\mathbb Z_2`` embedding
+always comes first, ahead of the same two compactification shifts:
+
+```
+begin model
+Label:<name>
+SpaceGroup:Geometry/Geometry_<PointGroup>_<i>_<j>.txt
+Lattice:E8xE8            # or Spin32
+Shifts and Wilsonlines:
+<16 rationals: Witten Z_2 embedding>
+<16 rationals: shift V_1>
+<16 rationals: shift V_2, zero-filled for a cyclic point group>
 <16 rationals: W_1>
 ...
 <16 rationals: W_6>
