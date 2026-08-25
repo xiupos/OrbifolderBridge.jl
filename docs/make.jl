@@ -21,6 +21,7 @@ makedocs(;
             "VEV Configurations" => "vev_configurations.md",
             "Model Classification and Generation" => "generation.md",
             "Couplings and the Superpotential" => "couplings.md",
+            "Mass Matrices" => "mass_matrices.md",
             "OSCAR Integration" => "oscar.md",
             "Consistency and Batch Workflows" => "batch.md",
         ],

@@ -75,6 +75,8 @@ The capability set also records backend-specific differences. In particular,
 `:coupling_refined_inequivalence` is available for SUSY 1.2.1 but not
 non-SUSY 1.0. Both backends advertise `:vev_configuration_mutation`, while
 `:field_vevs` and `:unbroken_gauge_group` are SUSY-only capabilities.
+`:couplings` and `:mass_matrices` are likewise SUSY-only because the supported
+non-SUSY command tree has no corresponding implementation.
 
 For setup diagnostics, [`check_backend`](@ref) catches configuration,
 execution, timeout, and compatibility failures and returns a

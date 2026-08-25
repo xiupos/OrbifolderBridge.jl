@@ -1,0 +1,14 @@
+/MSSM0/couplings> mass matrix(R C)
+
+  mass matrix: R_i M_ij C_j	(  1 x  1 matrix)
+	s
+
+
+  Mass matrix saved as #1.
+
+/MSSM0/couplings> print mass matrix(1) max order(3)
+
+  mass matrix: R_i M_ij C_j	(  1 x  1 matrix)
+	<F_13>
+
+

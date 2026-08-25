@@ -293,6 +293,28 @@ These commands are implemented only by SUSY orbifolder 1.2.1. The non-SUSY
 1.0 command table for this directory contains only `dir`; it has no Yukawa-
 coupling implementation.
 
+### Mass matrices
+
+`mass matrix(A B)` constructs `A_i M_ij B_j` from effective couplings already
+registered in the active VEV configuration and saves it as a process-local
+numbered matrix. `print mass matrix(1) max order(X)` prints explicit products
+such as `<n_1>` through order `X`; without a sufficient maximum it replaces a
+nonzero entry by `s` or `s^N`. Zero entries print as `0`, and several
+contributions are separated by ` + `.
+
+The constructor removes the selected row and column fields from each source
+coupling and prints the remaining fields only when all have nonzero VEVs. If
+there are at least ten columns and fewer rows than columns, it automatically
+transposes the matrix. The printed header gives the actual label orientation
+and dimensions and must therefore be treated as data rather than decoration.
+
+A verified nonempty batch sequence on `MSSM0` relabels stable fields 11 and 37
+as `A_1` and `B_1`, assigns a VEV to field 39, registers the corresponding
+cubic coupling, and prints a `1 x 1` entry `<n_1>`. Matrix commands are absent
+from non-SUSY 1.0. The broader `auto create mass matrix(...)` command searches
+additional singlet insertions internally; the bridge initially exposes only
+explicit coupling candidates so the requested search space is reproducible.
+
 `fields` are referenced by the active `with labels` names (`F_1`, `F_2`,
 ...). `create coupling(...)` requires at least three factors and forks an
 upstream child process. A deterministic batch script must follow it with

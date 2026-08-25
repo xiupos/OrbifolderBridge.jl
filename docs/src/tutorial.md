@@ -105,6 +105,8 @@ in reconstructing a highest weight from a printed representation dimension.
 ## Guide map
 
 - [Models and Geometry](@ref): model inputs and geometric/gauge embedding data.
+- [Couplings and the Superpotential](@ref) and [Mass Matrices](@ref): stable
+  field-linked interactions and exact OSCAR polynomial data.
 - [Spectra and Fields](@ref): gauge groups, grouped spectra, individual fields,
   localization, and queries.
 - [Model Classification and Generation](@ref): upstream model predicates,

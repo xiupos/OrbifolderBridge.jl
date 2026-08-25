@@ -11,6 +11,7 @@ using OrbifolderBridge
     include("test_configuration.jl")
     include("test_generation.jl")
     include("test_couplings.jl")
+    include("test_mass_matrices.jl")
     include("test_consistency.jl")
     include("test_parallel.jl")
 end

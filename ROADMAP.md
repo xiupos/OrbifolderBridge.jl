@@ -146,15 +146,21 @@ perform their own subsequent ideal-theoretic analysis.
 
 ## Phase 7: Mass matrices
 
-- [ ] **`[upstream]`** Request mass matrices for selected field families.
-- [ ] **`[bridge]`** Parse matrix entries and connect them to fields and couplings.
-- [ ] **`[upstream]`** Support effective matrices after VEV substitution.
-- [ ] **`[bridge]`** Convert symbolic results to suitable OSCAR polynomial rings and matrices.
-- [ ] **`[bridge]`** Attach stable field identifiers to matrix rows and columns
+- [x] **`[upstream]`** Request mass matrices for selected field families.
+- [x] **`[bridge]`** Parse matrix entries and connect them to fields and couplings.
+- [x] **`[upstream]`** Support effective matrices after VEV substitution.
+- [x] **`[bridge]`** Convert symbolic results to suitable OSCAR polynomial rings and matrices.
+- [x] **`[bridge]`** Attach stable field identifiers to matrix rows and columns
       and retain the coupling provenance of every entry.
-- [ ] **`[bridge]`** Support exact specialization of polynomial mass matrices at
+- [x] **`[bridge]`** Support exact specialization of polynomial mass matrices at
       a selected VEV configuration, leaving rank, minor, and determinantal-ideal
       analysis available through OSCAR.
+
+SUSY 1.2.1 constructs matrices from registered effective couplings and may
+automatically transpose wide matrices. The bridge uses temporary label
+families in an isolated derived configuration, records the printed
+orientation, and links each VEV monomial to its validated ordinary coupling.
+non-SUSY 1.0 has no coupling or mass-matrix implementation.
 
 ## Phase 8: Geometry and localization
 

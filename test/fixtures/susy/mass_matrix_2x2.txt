@@ -1,0 +1,4 @@
+  mass matrix: R_i M_ij C_j	(  2 x  2 matrix)
+	<F_13>		0
+	<F_15> + <F_13> <F_15>		<F_13>
+
