@@ -140,7 +140,8 @@ upstream and expands them without recomputing which couplings are allowed.
 Phase 6 supports ordinary couplings, searches across explicitly
 registered candidates, maximum-order request limits, OSCAR polynomial-ring
 conversion, exact symbolic VEV substitution, and parsing upstream's effective
-superpotential. Mass matrices remain Phase 7 work.
+superpotential. Effective matrices constructed from these source couplings are
+documented in [Mass Matrices](@ref).
 
 The upstream `remove vanishing couplings` command may stop for interactive
 `y/n` classification of a previously unknown representation pattern. It is

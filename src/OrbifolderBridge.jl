@@ -37,6 +37,8 @@ export compute_couplings, search_couplings, compute_effective_couplings
 export CouplingPolynomialRing, ExactVEVSubstitution, EffectiveCouplingPolynomial
 export coupling_polynomial_ring, coupling_polynomial
 export exact_vev_substitution, apply_vev_substitution
+export MassMatrixRequest, MassMatrixTerm, MassMatrixResult, MassMatrixParseError
+export parse_mass_matrix, compute_mass_matrix, mass_matrix_polynomial, specialize_mass_matrix
 export OrbifolderModel, model_file_text
 export UpstreamModelParseError, parse_orbifolder_models
 export ModelClassification, AnomalyReport, GenerationDiagnostic
@@ -63,11 +65,13 @@ include("core/exact_gauge.jl")
 include("core/consistency.jl")
 include("core/generation.jl")
 include("core/couplings.jl")
+include("core/mass_matrices.jl")
 
 include("oscar/cartan_type.jl")
 include("oscar/exact_gauge.jl")
 include("oscar/representations.jl")
 include("oscar/couplings.jl")
+include("oscar/mass_matrices.jl")
 
 include("parallel.jl")
 

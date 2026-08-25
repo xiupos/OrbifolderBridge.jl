@@ -158,6 +158,21 @@ products and parenthesized sums, separates dynamical and VEV fields, and
 matches every expanded term back to a registered ordinary coupling. It does
 not infer effective terms independently.
 
+Mass-matrix requests identify row and column fields by `FieldID`. In the
+isolated derived configuration, the bridge assigns temporary label families
+because upstream's command accepts families rather than internal field
+numbers. It registers explicit coupling candidates, requests upstream's mass
+matrix, normalizes any upstream automatic transpose, and matches every
+printed VEV monomial back to exactly one ordinary coupling from the validated
+native file. Matrix assembly therefore preserves upstream's physical decision
+and source provenance while avoiding configuration-dependent labels in the
+public result.
+
+The OSCAR conversion uses the same exact symbolic VEV ring as effective
+couplings. Exact rational specialization is an explicit user operation;
+upstream's floating-point VEV values are never silently treated as exact.
+Rank, minor, and determinantal-ideal analysis remain downstream OSCAR work.
+
 ## Execution model
 
 Every invocation runs in an isolated temporary directory. Backend-specific

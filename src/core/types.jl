@@ -491,3 +491,76 @@ end
 
 Base.showerror(io::IO, e::CouplingExecutionError) =
     print(io, "CouplingExecutionError: ", e.message)
+
+"""
+    MassMatrixRequest(rows, columns, couplings; max_order)
+
+A reproducible request for an effective mass matrix. `rows` and `columns`
+identify the external fields by stable field number, while `couplings` lists
+the ordinary monomials that upstream must test and register. `max_order`
+controls the explicit VEV products requested from upstream's matrix printer.
+"""
+struct MassMatrixRequest
+    rows::Vector{FieldID}
+    columns::Vector{FieldID}
+    couplings::Vector{CouplingRequest}
+    max_order::Int
+end
+@structural_equality MassMatrixRequest
+
+function MassMatrixRequest(
+    rows::AbstractVector{FieldID},
+    columns::AbstractVector{FieldID},
+    couplings::AbstractVector{CouplingRequest};
+    max_order::Integer,
+)
+    isempty(rows) && throw(ArgumentError("mass-matrix rows must not be empty"))
+    isempty(columns) && throw(ArgumentError("mass-matrix columns must not be empty"))
+    allunique(rows) || throw(ArgumentError("mass-matrix rows must be unique"))
+    allunique(columns) || throw(ArgumentError("mass-matrix columns must be unique"))
+    isempty(couplings) && throw(ArgumentError("at least one coupling request is required"))
+    allunique(couplings) || throw(ArgumentError("coupling requests must be unique"))
+    max_order >= 1 || throw(ArgumentError("max_order must be at least 1"))
+    overlap = intersect(rows, columns)
+    isempty(overlap) || collect(rows) == collect(columns) || throw(ArgumentError(
+        "row and column fields must be disjoint or identical",
+    ))
+    return MassMatrixRequest(collect(rows), collect(columns), collect(couplings), Int(max_order))
+end
+
+"""One upstream-derived VEV monomial in a mass-matrix entry."""
+struct MassMatrixTerm
+    source::CouplingTerm
+    vev_fields::Vector{FieldID}
+end
+@structural_equality MassMatrixTerm
+
+"""
+    MassMatrixResult
+
+An effective mass matrix reported by upstream. `entries[i, j]` is a vector
+because several ordinary couplings may contribute to the same matrix entry.
+Every contribution retains its ordinary source coupling and stable VEV fields.
+"""
+struct MassMatrixResult
+    specification::VEVConfigurationSpec
+    request::MassMatrixRequest
+    rows::Vector{FieldID}
+    columns::Vector{FieldID}
+    entries::Matrix{Vector{MassMatrixTerm}}
+    source_terms::Vector{CouplingTerm}
+    transposed::Bool
+    backend::BackendInfo
+    transcript::String
+    source::String
+end
+@structural_equality MassMatrixResult
+
+"""A malformed or unsupported upstream mass-matrix display."""
+struct MassMatrixParseError <: Exception
+    message::String
+    source::String
+end
+
+Base.showerror(io::IO, e::MassMatrixParseError) =
+    print(io, "MassMatrixParseError: ", e.message)
