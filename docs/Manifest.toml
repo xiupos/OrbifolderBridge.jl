@@ -652,9 +652,9 @@ version = "1.0.0-DEV"
 
 [[deps.Oscar]]
 deps = ["AbstractAlgebra", "AlgebraicSolving", "CodecZlib", "Compat", "Distributed", "GAP", "Hecke", "JSON", "JSON3", "LazyArtifacts", "Markdown", "Mongoc", "Nemo", "NetworkOptions", "Pkg", "Polymake", "ProgressMeter", "Random", "RandomExtensions", "Serialization", "Singular", "TOPCOM_jll", "TranscodingStreams", "UUIDs", "cohomCalg_jll", "f4ncgb_jll", "lib4ti2_jll"]
-git-tree-sha1 = "ae6987080ae5abdb08888f7f6e09c218d030c2e5"
+git-tree-sha1 = "96a8d3a5398d9a318dd605b84fdb804924c26ee3"
 uuid = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
-version = "1.8.1"
+version = "1.8.2"
 
     [deps.Oscar.extensions]
     HomotopyContinuationExt = "HomotopyContinuation"
