@@ -1,5 +1,9 @@
 # Design and Scope
 
+Maintainer reference, not part of the published documentation. Upstream
+behavior the design relies on is recorded in
+[`upstream_notes.md`](upstream_notes.md).
+
 ## Purpose
 
 OrbifolderBridge connects Julia and OSCAR to the upstream `orbifolder` and
@@ -28,13 +32,8 @@ formatted tables, or handle backend-specific output files.
 `run_orbifolder_script` remains available as an escape hatch for
 experimentation and features that do not yet have a typed API.
 
-The following are outside the core bridge:
-
-- reproducing the interactive REPL;
-- upstream session and job-control user interfaces;
-- presentation-oriented Mathematica, LaTeX, and text-file output modes;
-- phenomenological ranking and landscape-search policy;
-- independent Julia implementations of upstream physics algorithms.
+What the bridge deliberately does not provide is listed for users under
+"Out of scope" in `docs/src/index.md`.
 
 ## Domain model
 

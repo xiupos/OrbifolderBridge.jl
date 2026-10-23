@@ -129,5 +129,3 @@ in reconstructing a highest weight from a printed representation dimension.
   configurations, fixed SUSY VEVs, and observable/hidden sectors.
 - [Backend Configuration](@ref): binary discovery, low-level execution,
   parsers, and diagnostics.
-- [Design and Scope](@ref): architectural boundaries and future API direction.
-- [Upstream Notes](@ref): verified command protocol and output grammar.

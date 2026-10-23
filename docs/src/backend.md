@@ -14,7 +14,9 @@ parser building blocks.
 
 [`orbifolder_binary`](@ref) returns the JLL executable and
 [`orbifolder_geometry_dir`](@ref) returns the `Geometry/` directory bundled in the
-same artifact. OrbifolderBridge supports Linux only; see [Upstream Notes](@ref).
+same artifact. OrbifolderBridge supports Linux only: upstream requires a C++ standard library
+that can instantiate `std::complex<boost::rational<int>>`, which rules out the
+libc++ toolchains used for macOS and FreeBSD builds.
 
 [`backend_info`](@ref) runs the backend through its real isolated batch
 protocol and reads the kind and version from the startup banner:

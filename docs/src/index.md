@@ -85,12 +85,20 @@ presenting the related public API.
   representation that actually appears in these models' output (fundamentals, adjoints,
   vectors, spinors, ...), but is not a fully general inverse of the Weyl dimension formula.
 
-## Architecture
+## Out of scope
 
-Each subprocess call runs in its own `mktempdir()`, so parallel calls ([`compute_spectra`](@ref)
-etc.) never share files. Only the "launch binary, wait, capture text" step is parallelized via
-`asyncmap`; parsing — and especially building OSCAR/GAP objects — is done sequentially
-afterward, since GAP is not thread-safe.
+OrbifolderBridge drives upstream and returns typed results; it deliberately
+does not provide:
+
+- a reproduction of the upstream interactive REPL;
+- upstream session and job-control user interfaces;
+- presentation-oriented Mathematica, LaTeX, and text-file output modes;
+- phenomenological ranking or landscape-search policy;
+- Julia reimplementations of upstream physics algorithms such as spectrum
+  construction, GSO projection, coupling selection, or flatness analysis.
+
+[`run_orbifolder_script`](@ref) remains available for upstream features that
+have no typed API.
 
 ## License
 

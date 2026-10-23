@@ -27,8 +27,6 @@ makedocs(;
             "Consistency and Batch Workflows" => "batch.md",
         ],
         "Backend Configuration" => "backend.md",
-        "Design and Scope" => "design.md",
-        "Upstream Notes" => "upstream_notes.md",
     ],
 )
 

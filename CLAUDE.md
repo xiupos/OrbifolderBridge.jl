@@ -8,9 +8,10 @@ computations. Do not reimplement spectrum, GSO projection, coupling-selection,
 or flatness algorithms in Julia.
 
 The implementation roadmap is in `ROADMAP.md`. Architectural decisions and
-the boundary of the bridge are documented in `docs/src/design.md`. Findings
+the boundary of the bridge are documented in `docs/dev/design.md`. Findings
 about upstream programs and their command language belong in
-`docs/src/upstream_notes.md`.
+`docs/dev/upstream_notes.md`. Both are maintainer documents outside the
+published Documenter site.
 
 ## API design
 

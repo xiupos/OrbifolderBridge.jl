@@ -9,8 +9,8 @@ session UI, output formatting, or physics algorithms.
 
 The phases below express intended outcomes, not a compatibility promise or a
 fixed release schedule. Design details live in
-[`docs/src/design.md`](docs/src/design.md), and upstream investigation notes
-live in [`docs/src/upstream_notes.md`](docs/src/upstream_notes.md).
+[`docs/dev/design.md`](docs/dev/design.md), and upstream investigation notes
+live in [`docs/dev/upstream_notes.md`](docs/dev/upstream_notes.md).
 
 Each item is tagged by where the underlying capability comes from:
 

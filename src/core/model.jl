@@ -6,8 +6,8 @@ const _LATTICE_KEYWORD = Dict(:E8xE8 => "E8xE8", :Spin32 => "Spin32")
 A heterotic orbifold model: a point group (via a specific space-group file),
 a choice of 16-dimensional gauge lattice, the 16D shift vectors (two for
 SUSY, three for non-SUSY), and six 16D Wilson lines. This is the Julia-side
-counterpart of the upstream `begin model ... end model` file format (see
-`docs/src/upstream_notes.md`).
+counterpart of the upstream `begin model ... end model` file format (see the
+repository's `docs/dev/upstream_notes.md`).
 
 Construct with the keyword constructor below rather than calling this
 directly.
