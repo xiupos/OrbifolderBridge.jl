@@ -46,8 +46,7 @@ Pkg.develop(url="https://github.com/xiupos/OrbifolderBridge.jl")
 ```julia
 using OrbifolderBridge
 
-# A Z3 orbifold on the E8xE8 lattice (space group "Z3_1_1", point group Z3,
-# shipped as Geometry/Geometry_Z3_1_1.txt in both backends' source trees).
+# A Z3 orbifold on the E8xE8 lattice (Geometry/Geometry_Z3_1_1.txt, point group Z3).
 model = OrbifolderModel(;
     mode = :nonsusy,
     label = "Z3_1_1",
@@ -65,28 +64,6 @@ println(length(spectrum.fields))               # 13
 for f in spectrum.fields
     println(f.multiplicity, " × ", f.rep, "_", f.statistic, "  charges: ", f.charges)
 end
-```
-
-### Mapping onto OSCAR root systems and representations
-
-```julia
-using Oscar, OrbifolderBridge
-
-root_systems = gauge_group_root_systems(spectrum.gauge_group)  # Vector{RootSystem}, one per factor
-
-for f in spectrum.fields
-    weights = field_weights(root_systems, f)   # Vector{WeightLatticeElem}
-    println(f.multiplicity, " × ", weights)
-end
-```
-
-### Many models in parallel
-
-```julia
-models = [OrbifolderModel(; mode = :nonsusy, label = "M$i", point_group = "Z3_1_1", shift = shift_i)
-          for (i, shift_i) in enumerate(candidate_shifts)]
-
-spectra = compute_spectra(models; ntasks = 8)  # asyncmap over subprocess launches; parsing is sequential
 ```
 
 Start with the [Overview](@ref), then use the task-oriented guide pages for
@@ -117,5 +94,5 @@ afterward, since GAP is not thread-safe.
 
 ## License
 
-MIT for this bridge package. The upstream `orbifolder`/`nonSUSYorbifolder` tools you build and
-run separately are licensed under the GPL — see their respective repositories.
+MIT for this bridge package. The upstream `orbifolder`/`nonSUSYorbifolder` tools, installed
+through their JLL packages, are licensed under the GPL — see their respective repositories.

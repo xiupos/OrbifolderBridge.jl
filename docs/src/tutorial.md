@@ -6,12 +6,14 @@ CurrentModule = OrbifolderBridge
 
 OrbifolderBridge connects a typed Julia model to the upstream `orbifolder` or
 `nonSUSYorbifolder` executable and turns its results back into Julia values.
-The usual workflow has four steps:
+The usual workflow has three steps:
 
-1. configure a backend and its `Geometry/` directory;
-2. construct an [`OrbifolderModel`](@ref);
-3. let upstream check or analyze it;
-4. inspect the parsed spectrum, optionally as OSCAR objects.
+1. construct an [`OrbifolderModel`](@ref);
+2. let upstream check or analyze it;
+3. inspect the parsed spectrum, optionally as OSCAR objects.
+
+The upstream executables and their `Geometry/` data are installed
+automatically through `OrbiFolder_jll` and `NonSUSYOrbiFolder_jll`.
 
 The bridge does not reproduce upstream's physics algorithms. Spectrum
 construction, modular-invariance checks, projections, and coupling selection

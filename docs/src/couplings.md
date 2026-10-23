@@ -137,7 +137,7 @@ upstream and expands them without recomputing which couplings are allowed.
 
 ## Current boundary
 
-Phase 6 supports ordinary couplings, searches across explicitly
+The bridge supports ordinary couplings, searches across explicitly
 registered candidates, maximum-order request limits, OSCAR polynomial-ring
 conversion, exact symbolic VEV substitution, and parsing upstream's effective
 superpotential. Effective matrices constructed from these source couplings are

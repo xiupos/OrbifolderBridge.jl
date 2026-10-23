@@ -4,9 +4,10 @@ const _LATTICE_KEYWORD = Dict(:E8xE8 => "E8xE8", :Spin32 => "Spin32")
     OrbifolderModel
 
 A heterotic orbifold model: a point group (via a specific space-group file),
-a choice of ten-dimensional gauge lattice, up to two 16D shift vectors, and
-six 16D Wilson lines. This is the Julia-side counterpart of the upstream
-`begin model ... end model` file format (see `docs/src/upstream_notes.md`).
+a choice of 16-dimensional gauge lattice, the 16D shift vectors (two for
+SUSY, three for non-SUSY), and six 16D Wilson lines. This is the Julia-side
+counterpart of the upstream `begin model ... end model` file format (see
+`docs/src/upstream_notes.md`).
 
 Construct with the keyword constructor below rather than calling this
 directly.
@@ -30,7 +31,7 @@ end
 
 """
     OrbifolderModel(; mode, label, point_group, shift, lattice = :E8xE8,
-                     wilson_lines = fill(zeros(Int, 16), 6))
+                     wilson_lines = [])
 
 Construct an [`OrbifolderModel`](@ref).
 
@@ -41,12 +42,12 @@ Construct an [`OrbifolderModel`](@ref).
   [`orbifolder_geometry_dir`](@ref)`(mode)`
 - `shift`: for `mode = :susy`, either a single 16-entry vector \$V_1\$ (for a
   \$\\mathbb{Z}_M\$ point group) or a pair `(V_1, V_2)` (for
-  \$\\mathbb{Z}_M \\times \\mathbb{Z}_N\$). For `mode = :nonsusy`, the pair
-  follows upstream's three shift slots: the Witten \$\\mathbb{Z}_2\$ embedding
-  followed by up to two compactification point-group embeddings. A single
-  vector fills the first slot and leaves the remaining slots zero.
+  \$\\mathbb{Z}_M \\times \\mathbb{Z}_N\$). For `mode = :nonsusy`, a single
+  vector or a tuple of up to three vectors fills upstream's three shift slots
+  in order: the Witten \$\\mathbb{Z}_2\$ embedding, then up to two
+  compactification point-group embeddings. Unfilled slots are zero.
 - `lattice`: `:E8xE8` or `:Spin32` (the \$E_8 \\times E_8\$ or
-  \$\\mathrm{Spin}(32)/\\mathbb{Z}_2\$ ten-dimensional gauge lattice)
+  \$\\mathrm{Spin}(32)/\\mathbb{Z}_2\$ 16-dimensional gauge lattice)
 - `wilson_lines`: up to six 16-entry vectors \$W_1,\\dots,W_6\$; defaults to
   all zero. Fewer than six may be given, and the rest are zero-filled.
 """

@@ -13,16 +13,19 @@ couplings, and vacuum-flatness calculations remain authoritative upstream.
 
 ## Boundary of the bridge
 
-The public interface should be declarative and typed:
+The public interface is declarative and typed:
 
 ```julia
 model = OrbifolderModel(...)
-result = analyze(model; config = "TestConfig1", include = [:spectrum, :couplings])
+result = analyze(model;
+    config = VEVConfigurationRef("TestConfig1"),
+    include = [:spectrum, :detailed_spectrum],
+)
 ```
 
-Users should not normally need to navigate the upstream prompt, manage its
-current directory, parse formatted tables, or handle backend-specific output
-files. `run_orbifolder_script` remains available as an escape hatch for
+Users do not navigate the upstream prompt, manage its current directory, parse
+formatted tables, or handle backend-specific output files.
+`run_orbifolder_script` remains available as an escape hatch for
 experimentation and features that do not yet have a typed API.
 
 The following are outside the core bridge:
@@ -37,26 +40,19 @@ The following are outside the core bridge:
 
 ### Stable field identity
 
-Fields are the central entities connecting spectra, localization, VEVs,
-couplings, and mass matrices. Future APIs should therefore use a stable field
-identifier rather than relying on a summary row or a display label alone.
+Fields connect spectra, localization, VEVs, couplings, and mass matrices, so
+results refer to them by `FieldID` rather than by a summary row or a
+display label. `FieldID` wraps upstream's zero-based `field no.`, which does
+not depend on the selected label scheme. Its scope is one model and backend
+field basis, identified across saved analyses by
+`AnalysisProvenance`.
 
-A detailed spectrum should preserve both grouped and individual views:
-
-- the grouped view efficiently represents repeated quantum numbers;
-- the individual view assigns an identity to every field;
-- labels are configuration-dependent metadata, not the primary identity;
-- sector and localization data belong to the individual state.
-
-The implemented [`FieldID`](@ref) wraps upstream's zero-based `field no.`,
-which is independent of the selected display-label scheme. Its stability scope
-is one model and backend field basis; provenance added in Phase 9 will identify
-that scope across serialized analyses. [`DetailedSpectrum`](@ref) carries the
-existing grouped [`Spectrum`](@ref) alongside individually identified
-[`DetailedField`](@ref)s, so no multiplicity information is discarded.
-
-This design prevents multiplicity expansion, relabeling, or a configuration
-change from breaking references held by coupling and mass-matrix results.
+`DetailedSpectrum` keeps both views: the grouped `Spectrum`
+for repeated quantum numbers, and individually identified
+`DetailedField`s carrying sector and localization data. Labels are
+configuration-dependent metadata. Multiplicity expansion, relabeling, or a
+configuration change therefore cannot break references held by coupling and
+mass-matrix results.
 
 ### Geometry and localization
 
@@ -66,212 +62,164 @@ root-lattice label, the selected Geometry file, and the generators upstream
 prints. It does not reconstruct conjugacy classes, fixed sets, centralizers,
 or other Geometry-engine results from the file contents.
 
-SUSY and non-SUSY Geometry trees share the 138 supported filenames but not the
-same grammar: non-SUSY adds the Witten twist coordinate. Consequently a
-`SpaceGroupElement` contains a backend-shaped `Sector` and a common six-entry
-translation, and catalogue entries retain their backend identity.
+SUSY and non-SUSY Geometry trees share filenames but not grammar: non-SUSY
+adds the Witten twist coordinate. A `SpaceGroupElement` therefore contains a
+backend-shaped `Sector` and a common six-entry translation, and catalogue
+entries retain their backend identity.
 
 Field localizations are grouped by the complete constructing element together
-with upstream's fixed-point/fixed-brane label and exact local shift. The
-result links stable `FieldID`s to that location. Since the supported prompt
-does not provide a stable local-gauge-group result, `LocalGaugeData` exposes
-the authoritative local shift and localized states without deriving a group
-in Julia.
+with upstream's fixed-point/fixed-brane label and exact local shift, and link
+stable `FieldID`s to that location. Since upstream provides no local gauge
+group, `LocalGaugeData` exposes the local shift and localized states without
+deriving a group in Julia.
 
 ### VEV configuration
 
-Any result that depends on a VEV configuration must make that configuration
-explicit. It must not silently depend on the upstream prompt's current state.
-The configuration connects:
+Every configuration-dependent result names its configuration explicitly
+instead of depending on the upstream prompt's current state. The configuration
+determines field labels and VEV assignments, observable and hidden gauge
+factors, the unbroken gauge group, and the effective spectrum,
+superpotential, and mass matrices.
 
-- field labels and VEV assignments;
-- observable and hidden gauge factors;
-- the unbroken gauge group;
-- the effective spectrum, superpotential, and mass matrices.
+`VEVConfigurationRef` selects an existing configuration. Each
+operation selects it in a fresh isolated process and verifies upstream's
+acknowledgement. Overloads without a reference remain for compatibility, but
+reproducible code should not depend on the initially selected `TestConfig1`.
+`GaugeSector` records observable and hidden factor indices separately
+from algebra names.
 
-Read-only selection and inspection should precede configuration mutation.
-Mutation, when added, should use immutable or copy-on-write Julia descriptions
-that can be serialized and reproduced.
-
-Read-only selection is implemented by [`VEVConfigurationRef`](@ref). Every
-explicit configuration-dependent operation selects that reference in a fresh
-isolated process and verifies upstream's acknowledgement. Legacy overloads
-without a reference remain for compatibility, but reproducible code should not
-depend on the initially selected `TestConfig1`. [`GaugeSector`](@ref) records
-observable and hidden factor indices separately from algebra names.
-
-[`VEVConfigurationSpec`](@ref) is an immutable replay description rather than
-a handle to process-local upstream state. Materialization resolves stable
-field identities in the base configuration, then reconstructs the derived
-configuration in a second isolated run. Both transcripts are retained in the
-result. The common subset covers configuration derivation and observable
-sector selection; fixed VEVs and unbroken-group recomputation are advertised
-only by the SUSY backend.
+`VEVConfigurationSpec` is an immutable replay description, since
+upstream configurations exist only within one process. Materialization
+resolves `FieldID`s in the base configuration, then reconstructs the derived
+configuration in a second isolated run; both transcripts are retained.
+Configuration derivation and observable-sector selection work on both
+backends; fixed VEVs and unbroken-group recomputation are SUSY-only.
 
 SUSY accepts VEVs by active field label and stores floating-point values. The
 bridge resolves labels from `FieldID`, excludes random values, verifies
-nonzero assignments through internal-information readback, and initially
-restricts assignments to non-abelian singlets because upstream exposes no
-weight-component selector. non-SUSY's prompt has no equivalent VEV operation.
+nonzero assignments through internal-information readback, and restricts
+assignments to non-abelian singlets because upstream exposes no
+weight-component selector.
 
-When a non-abelian factor is hidden, upstream folds its representation
-dimension into grouped spectrum multiplicities. A derived result therefore
-does not claim to provide an unambiguous `DetailedSpectrum` in that case.
+When a non-abelian factor is hidden, upstream folds its dimension into grouped
+multiplicities, so a derived result does not provide a `DetailedSpectrum` in
+that case.
 
 ### Gauge and representation data
 
-Gauge data should retain exact information whenever upstream makes it
-available: simple roots, U(1) generators and normalization, anomalous
-generators, and Dynkin labels or highest weights. Mapping a printed dimension
-back to a representation is necessarily ambiguous and should remain a fallback,
-not the preferred interchange format.
+Gauge data retains exact information wherever upstream prints it. Mapping a
+printed dimension back to a representation is ambiguous and remains an
+explicit fallback rather than the interchange format.
 
-[`ExactGaugeData`](@ref) retains the simple roots and U(1) generators printed
-by upstream as exact 16-dimensional rational vectors. The OSCAR conversion
-constructs an [`EmbeddedGaugeFactor`](@ref) for each non-abelian factor: its
-`RootSystem`, `WeightLattice`, embedded `ZZLat`, and fundamental-weight matrix
-share upstream's simple-root numbering. Construction verifies the complete
-Cartan matrix and rejects an unexpected ordering or output drift.
+`ExactGaugeData` retains upstream's simple roots and U(1) generators
+as exact 16-dimensional rational vectors. The OSCAR conversion builds an
+`EmbeddedGaugeFactor` per non-abelian factor whose `RootSystem`,
+`WeightLattice`, embedded `ZZLat`, and fundamental-weight matrix share
+upstream's simple-root numbering. Construction verifies the complete Cartan
+matrix and rejects an unexpected ordering or output drift.
 
-[`compare_gauge_embeddings`](@ref) compares two such upstream results over
-`QQ`. It records identical simple roots, basis-independent containment in the
-other root or U(1) span, and exact intersection ranks. This describes the
-change reported by upstream; it does not decide which roots a VEV should
-break. A declarative derived configuration is inspected in the same isolated
-run in which it is created, since upstream configurations are process-local.
+`compare_gauge_embeddings` compares two upstream results over `QQ`:
+identical simple roots, basis-independent containment in the other root or
+U(1) span, and exact intersection ranks. It describes the change upstream
+reports; it does not decide which roots a VEV should break.
 
 ### Couplings and mass matrices
 
-The bridge should ask upstream to compute allowed couplings and then parse the
-answer. A coupling should refer to stable field identities and record relevant
-order and effective-VEV information. A mass-matrix entry should remain linked
-to the coupling expressions that generated it before optional conversion to an
-OSCAR polynomial matrix.
+Upstream computes allowed couplings; the bridge parses the answer and links
+every term to stable field identities.
 
-Ordinary coupling requests are implemented for SUSY orbifolder. A request is
-expressed entirely in `FieldID` values; the bridge resolves configuration-local
-labels only while rendering the command. Upstream performs the calculation in
-a child process, after which the bridge parses `save couplings(...)`. That
-native format stores zero-based internal field numbers and a complete gauge-
-embedding header, making it a stronger interchange format than the formatted
-`W = ...` display. The parser checks the header against the model and the
-numbers against the inspected field basis before constructing `CouplingTerm`
-values.
+Ordinary coupling requests are implemented for SUSY orbifolder and expressed
+entirely in `FieldID`s; configuration-local labels appear only in the
+rendered command. The bridge parses upstream's native `save couplings(...)`
+file rather than the formatted `W = ...` display, because it stores internal
+field numbers and the full gauge-embedding header. The parser checks the
+header against the model and the numbers against the inspected field basis.
+The non-SUSY backend has no coupling commands and does not advertise the
+capability. `remove vanishing couplings` is not used, because it may ask for a
+decision on raw stdin.
 
-The supported non-SUSY backend has no coupling commands beyond `dir` and does
-not advertise this capability. Interactive classification through `remove
-vanishing couplings` is also outside the non-interactive API until upstream
-can provide a reproducible decision without reading from raw stdin.
+Coupling terms map to an OSCAR polynomial ring over `QQ` whose generators are
+named after stable field numbers. Upstream reports no coupling strengths, so
+monomials carry unit coefficients. Exact VEV substitution maps a VEV field to
+a symbolic `v_<number>` generator rather than coercing upstream's
+floating-point magnitude into an exact coefficient, and each image stays
+paired with its source term.
 
-Parsed coupling terms map to a canonical OSCAR polynomial ring over `QQ`
-whose generator names and inverse dictionary derive from stable field numbers.
-Since upstream does not report exact numerical coupling strengths, allowed
-monomials carry unit coefficients rather than invented constants. Exact VEV
-substitution maps a VEV field generator to a distinct symbolic `v_<number>`
-generator. It does not coerce upstream's floating-point VEV magnitude into an
-exact coefficient, and each image remains paired with its source term.
+For declarative SUSY configurations, coupling generation and `print effective
+superpotential` run in the process that creates the configuration. The
+effective-expression parser expands upstream's products and parenthesized
+sums and matches every term back to a registered ordinary coupling; it does
+not infer effective terms itself.
 
-For declarative SUSY configurations, ordinary coupling generation and
-`print effective superpotential` execute in the same process that creates the
-configuration. The effective-expression parser expands upstream's implicit
-products and parenthesized sums, separates dynamical and VEV fields, and
-matches every expanded term back to a registered ordinary coupling. It does
-not infer effective terms independently.
-
-Mass-matrix requests identify row and column fields by `FieldID`. In the
-isolated derived configuration, the bridge assigns temporary label families
-because upstream's command accepts families rather than internal field
-numbers. It registers explicit coupling candidates, requests upstream's mass
-matrix, normalizes any upstream automatic transpose, and matches every
-printed VEV monomial back to exactly one ordinary coupling from the validated
-native file. Matrix assembly therefore preserves upstream's physical decision
-and source provenance while avoiding configuration-dependent labels in the
-public result.
-
-The OSCAR conversion uses the same exact symbolic VEV ring as effective
-couplings. Exact rational specialization is an explicit user operation;
-upstream's floating-point VEV values are never silently treated as exact.
-Rank, minor, and determinantal-ideal analysis remain downstream OSCAR work.
+Mass-matrix requests identify rows and columns by `FieldID`. Because upstream
+accepts label families rather than field numbers, the bridge assigns temporary
+families in the derived configuration, registers explicit coupling
+candidates, normalizes any automatic transpose, and matches every printed VEV
+monomial to exactly one validated ordinary coupling. The OSCAR conversion uses
+the same symbolic VEV ring; rational specialization is an explicit user
+operation, and rank or determinantal analysis is left to OSCAR.
 
 ## Execution model
 
 Every invocation runs in an isolated temporary directory. Backend-specific
 details—stdin-driven SUSY execution versus the non-SUSY script result file—are
-internal implementation concerns.
+internal. Each public operation:
 
-Public operations should:
-
-1. validate the binary, Geometry directory, version, and capabilities;
-2. render deterministic input and command files;
-3. execute with a timeout and collect all generated output;
-4. split the transcript by command;
-5. parse plain Julia values;
-6. construct OSCAR objects only after parsing succeeds.
+1. validates the binary, Geometry directory, version, and capabilities;
+2. renders deterministic input and command files;
+3. executes with a timeout and collects all generated output;
+4. splits the transcript by command;
+5. parses plain Julia values;
+6. constructs OSCAR objects only after parsing succeeds.
 
 Keeping parsing separate from OSCAR construction makes parser tests cheap and
-avoids unsafe parallel use of GAP-backed objects. Batch execution may launch
-independent subprocesses concurrently, while OSCAR conversion remains
-sequential unless the underlying libraries become safe for parallel use.
+avoids parallel use of GAP-backed objects: batch execution runs subprocesses
+concurrently, while OSCAR conversion stays sequential.
 
 ## Compatibility and capabilities
 
-Backend kind and version are part of the computation environment. Capability
-checks are preferable to scattered version conditionals:
+Backend kind and version are part of the computation environment, and
+capability checks replace scattered version conditionals:
 
 ```julia
-info = backend_info(:nonsusy)
-supports(info, :effective_couplings)
+info = backend_info(:susy)
+supports(info, :couplings)
 ```
 
-The compatibility table currently recognizes SUSY 1.2.1 and non-SUSY 1.0.
-Every public operation performs a preflight through the backend's actual batch
-protocol before its transcript is parsed. An unknown kind or version causes a
-diagnostic failure rather than silent partial parsing. Fixtures identify the
-backend and version that produced them, and SUSY and non-SUSY fixtures remain
-separate whenever their command protocol or output grammar differs.
+The compatibility table recognizes SUSY 1.2.1 and non-SUSY 1.0. Every public
+operation performs a preflight through the backend's batch protocol, and an
+unknown kind or version fails with a diagnostic rather than partial parsing.
+SUSY and non-SUSY fixtures stay separate wherever their protocol or grammar
+differs.
 
-Random generation is an upstream operation and currently has no seed option:
-the supported programs initialize their generator from wall-clock time. The
-bridge therefore records the request, accepted model blocks, backend,
-warnings, and sanitized transcript as provenance rather than claiming that
-rerunning a request reproduces its random candidates. Generated side files
-are read inside the isolated temporary directory before cleanup and returned
+Random generation has no seed option upstream, so the bridge records the
+request, accepted model blocks, backend, warnings, and sanitized transcript as
+provenance without claiming that a rerun reproduces the candidates. Generated
+side files are read before the temporary directory is removed and returned
 only as parsed values.
 
 ## Reproducibility and provenance
 
-Computed values should be traceable to:
+`ComputationContext` fixes the model, validated backend, explicit VEV
+configuration, and timeout. `analyze` returns the requested values in
+an `AnalysisResult` with one shared `AnalysisProvenance`:
+backend, SHA-256 of the exact rendered model input, Geometry filename and
+content hash, VEV configuration, executed commands, warnings, and raw
+transcript. The Geometry hash detects a changed definition under the same
+filename.
 
-- backend kind and version;
-- the exact rendered model input or its cryptographic hash;
-- Geometry data identity;
-- VEV configuration;
-- executed commands;
-- warnings and raw transcript.
-
-[`ComputationContext`](@ref) fixes the model, validated backend, explicit VEV
-configuration, and timeout. [`analyze`](@ref) returns the requested plain
-parsed values in an [`AnalysisResult`](@ref), with one shared
-[`AnalysisProvenance`](@ref) rather than duplicating metadata in every small
-value type. The model identity is the SHA-256 of its exact rendered upstream
-input; the Geometry identity combines the selected filename with the SHA-256
-of that file's contents. This scopes stable field identifiers across saved
-analyses and detects a changed Geometry definition under the same filename.
-
-The integrated command planner coalesces read-only dependencies. A detailed
-spectrum supplies its summary and localization data, while exact gauge data
-reuses the same gauge-group and spectrum blocks. Coupling generation, mass
-matrices, random generation, and declarative configuration materialization
-retain dedicated APIs because their child-process, artifact, or state-mutation
-protocols are not equivalent to a read-only query.
+The integrated command planner coalesces read-only dependencies: a detailed
+spectrum supplies localization data, and exact gauge data reuses the
+gauge-group and spectrum output. Coupling generation, mass matrices, random
+generation, and configuration materialization keep dedicated APIs because
+they start child processes, write side files, or mutate process-local state.
 
 ## API evolution
 
-Prefer small composable queries such as `compute_spectrum` for common work and
-the integrated `analyze` operation when several related results must share a
-single configuration and transcript. Existing low-level functions should
-remain available where practical, but new public APIs should not expose prompt
-paths or backend-specific file handling.
+Prefer small queries such as `compute_spectrum` for common work and
+`analyze` when several results must share one configuration and transcript.
+Existing low-level functions remain available where practical, but new public
+APIs do not expose prompt paths or backend-specific file handling.
 
-The planned implementation order and completion status are maintained in the
-repository-level `ROADMAP.md`.
+Implementation order and status are tracked in the repository-level
+`ROADMAP.md`.

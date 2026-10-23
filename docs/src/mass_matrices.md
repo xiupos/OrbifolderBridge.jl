@@ -57,7 +57,7 @@ zero entry is represented by an empty vector.
 
 ## Exact OSCAR matrices
 
-Phase 6's exact symbolic VEV substitution supplies the coefficient ring:
+The exact symbolic VEV substitution from [Couplings and the Superpotential](@ref) supplies the coefficient ring:
 
 ```julia
 ring = coupling_polynomial_ring(result.source_terms)
