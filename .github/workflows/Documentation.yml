@@ -17,6 +17,7 @@ on:
       - 'Project.toml'
       - 'Manifest.toml'
       - '.github/workflows/Documentation.yml'
+  workflow_dispatch:
 
 jobs:
   build:
