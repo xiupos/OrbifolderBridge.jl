@@ -98,15 +98,9 @@ end
 end
 
 @testset "parse spectrum after hiding all U(1) factors" begin
-    # Real nonSUSYorbifolder 1.0 output for the guide's Z3_1_1 model
-    # (fixtures/nonsusy/modelZ3_1_1.txt) after `create config(BridgeConfig1)
-    # from(TestConfig1)` and `select observable sector: gauge group(1,3) no
-    # U1s`, which hides SU(3) and every U(1). Rows that differed only in the
-    # now-hidden SU(3) merge, with the hidden factor's dimension folded into
-    # the multiplicity. Against z3_1_1_summary.txt's scalars that is
-    # 3x(10,3)+27x(10,1) -> 9+27 = 36 and
-    # 3x(1,3)+27x(1,1)+81x(1,-3) -> 9+27+243 = 279; the fermions likewise
-    # give 1+3x3+27 = 37 and 3x3+27 = 36.
+    # Z3_1_1 after `select observable sector: gauge group(1,3) no U1s`: rows
+    # differing only in the hidden SU(3) merge, folding its dimension into
+    # the multiplicity.
     text = read(joinpath(@__DIR__, "fixtures", "nonsusy", "derived_summary.txt"), String)
     spectrum = parse_spectrum(text)
     @test spectrum.gauge_group == GaugeGroup("BridgeConfig1", ["SO(10)", "SO(16)"], 0)
@@ -164,21 +158,10 @@ end
     field_output = output_for(susy_pairs, "print(*) with internal information")
     @test_throws ErrorException OrbifolderBridge._parse_field_details(replace(field_output, "field no." => "field index"; count = 1))
 
-    # Partly synthetic grammar-coverage block. Real gauge-boson blocks are
-    # obtainable -- `print(*) vector with internal information` prints them,
-    # though the bridge itself only ever issues the unqualified `print(*)`,
-    # which FindSUSYType defaults to LeftChiral for an N=1 model -- and the
-    # untwisted sector, zero constructing translation and q_sh = (-1,0,0,0)
-    # below are copied from such a capture (orbifolder 1.2.1, MSSM0, V_1).
-    #
-    # Two parts stay hand-written. `R charges` is only printed when the
-    # Geometry file declares a discrete R symmetry, and no file shipped by
-    # either backend does, so that line cannot be captured at all. The
-    # representation is simplified to a bare `8`: every real gauge boson is
-    # an adjoint, so upstream's PrintSDimension always appends its
-    # AdditionalLabel (`8_adj`), which neither this parser nor parse_spectrum
-    # currently accepts. Replace this with a verbatim capture once that
-    # suffix is supported.
+    # Partly synthetic: based on a real gauge-boson capture, but `R charges`
+    # (no shipped Geometry declares a discrete R symmetry) is hand-written and
+    # the rep is `8` instead of upstream's `8_adj`, which the parser does not
+    # yet accept. Replace with a verbatim capture once it does.
     optional_charges = """
         gauge boson: A_1
       sector (k,l)        : (0, 0)

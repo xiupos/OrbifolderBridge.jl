@@ -4,14 +4,8 @@
             mode = :nonsusy, label = "Z3_1_1", point_group = "Z3_1_1",
             shift = ([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [1 // 3, 1 // 3, -2 // 3, zeros(Int, 13)...]),
         )
-        # Second model: same point group and compactification shift, but
-        # with a nontrivial (order-3, W_1 = W_2 identified) Wilson line
-        # breaking the second E8 further, SO(16) -> SO(10) x SU(3). This
-        # gives a genuinely different gauge group and field count (not
-        # merely a coordinate permutation of the same embedding, as an
-        # earlier version of this fixture used), so a file mixup between
-        # concurrent runs shows up as cross-contaminated results instead
-        # of silently matching anyway.
+        # A Wilson line gives a different gauge group and field count, so a
+        # file mixup between concurrent runs shows up as wrong results.
         _z3_alt_wilson_line = Rational{Int}[
             0, 0, 0, 0, 0, 0, 0, 0, 1 // 3, 1 // 3, -2 // 3, 0, 0, 0, 0, 0,
         ]
@@ -26,9 +20,7 @@
         )
         @test compute_gauge_group(m_z3_alt) != compute_gauge_group(m_z3)
 
-        # Interleave many copies of both models so concurrent asyncmap
-        # tasks are genuinely racing against each other, not just running
-        # N copies of an identical model.
+        # Interleave both models so concurrent tasks race on distinct inputs.
         models = [isodd(i) ? m_z3 : m_z3_alt for i in 1:20]
         expected = [isodd(i) ? compute_spectrum(m_z3) : compute_spectrum(m_z3_alt) for i in 1:20]
 

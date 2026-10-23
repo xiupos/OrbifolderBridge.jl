@@ -1,14 +1,5 @@
-# Run `commands` for each of `models` concurrently (asyncmap over
-# process-launch-and-wait, which is I/O-bound: each call gets its own
-# mktempdir via run_orbifolder_script, so concurrent calls never share
-# files), then parse every raw transcript sequentially with `parser`.
-#
-# The split matters: GAP (used by the Phase 4 Oscar/GAP mapping layer) is
-# not thread-safe, so nothing that might end up calling into GAP may run
-# concurrently. Plain-text parsing (this function) doesn't touch GAP, but
-# callers that go on to build Oscar objects from the results (e.g.
-# `gauge_group_root_systems`, `field_weights`) must still do so in an
-# ordinary sequential loop.
+# Run upstream concurrently, then parse sequentially. GAP is not thread-safe,
+# so callers must also build Oscar objects from the results sequentially.
 function _parallel_compute(
     models::AbstractVector{OrbifolderModel},
     commands::Vector{<:AbstractString},
