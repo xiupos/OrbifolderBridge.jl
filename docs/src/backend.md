@@ -5,31 +5,19 @@ CurrentModule = OrbifolderBridge
 # Backend Configuration
 
 Every public computation ultimately launches one of the two upstream
-executables in an isolated temporary directory. Most users only need to
-configure the executable and its matching `Geometry/` directory; the remaining
-functions on this page are escape hatches and parser building blocks.
+executables in an isolated temporary directory. The executables and their
+`Geometry/` directories come from the `OrbiFolder_jll`/`NonSUSYOrbiFolder_jll`
+dependencies. The remaining functions on this page are escape hatches and
+parser building blocks.
 
 ## Locating binaries and Geometry data
 
-```julia
-set_orbifolder_binary!(:susy, "/path/to/orbifolder")
-set_orbifolder_geometry_dir!(:susy, "/path/to/Geometry")
-```
+[`orbifolder_binary`](@ref) returns the JLL executable and
+[`orbifolder_geometry_dir`](@ref) returns the `Geometry/` directory bundled in the
+same artifact. OrbifolderBridge supports Linux only; see [Upstream Notes](@ref).
 
-Configuration can also come from `ORBIFOLDER_BIN`,
-`NONSUSYORBIFOLDER_BIN`, `ORBIFOLDER_GEOMETRY_DIR`, and
-`NONSUSYORBIFOLDER_GEOMETRY_DIR`. The getter functions first resolve
-environment variables, then Preferences.jl settings, then documented path
-fallbacks.
-
-Relative paths are accepted and resolved against the current directory at
-configuration time: the getters always return absolute paths, because each
-invocation runs in its own temporary working directory.
-
-The binary and Geometry directory must belong to a compatible upstream tree.
-[`backend_info`](@ref) validates both paths, runs the backend through its real
-isolated batch protocol, and reads the kind and version from the startup
-banner:
+[`backend_info`](@ref) runs the backend through its real isolated batch
+protocol and reads the kind and version from the startup banner:
 
 ```julia
 info = backend_info(:susy)
@@ -43,17 +31,12 @@ OrbifolderBridge currently supports `orbifolder` 1.2.1 and
 partial data. Every typed computation and raw script performs this preflight
 check.
 
-The configured paths, the executable bit, and the `Geometry/` inventory are
-re-checked on every call, but a successful probe is cached per binary path and
-modification time, so a computation launches the backend once rather than
-twice. Rebuilding the binary invalidates the cache; `refresh = true` forces a
-new probe.
+A successful probe is cached per mode, so a computation launches the backend
+once rather than twice; `refresh = true` forces a new probe.
 
 ```@docs
 orbifolder_binary
-set_orbifolder_binary!
 orbifolder_geometry_dir
-set_orbifolder_geometry_dir!
 BackendInfo
 BackendCompatibilityError
 backend_info
@@ -88,9 +71,8 @@ result = check_backend(:susy)
 result.ok || @warn result.message
 ```
 
-This check is deliberately lightweight: it verifies the executable, requires
-a nonempty Geometry-file inventory, and completes the backend's normal script
-protocol without loading a physical model. Being a diagnostic, it always
+This check is deliberately lightweight: it completes the backend's normal
+script protocol without loading a physical model. Being a diagnostic, it always
 re-probes the executable instead of reusing a cached [`backend_info`](@ref).
 
 ```@docs

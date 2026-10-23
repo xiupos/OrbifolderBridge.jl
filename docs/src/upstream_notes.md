@@ -15,10 +15,18 @@ This is the basis for the subprocess-driven design (`src/core/`).
   `Config/config.h`, ...) are gitignored upstream and must be regenerated with
   `autoreconf -fi` before `./configure && make` — the repo does not ship them.
 
-Neither upstream repo is vendored into this package's git history; Phase 2
-should fetch them at build/deps time (e.g. into a Scratch/Preferences-configured
-directory), matching the "detect or build" pattern already used for build steps
-in `GrobCovBridge.jl`/`OscarHCBridge.jl`-style bridges.
+## Obtaining the binaries
+
+`orbifolder_binary`/`orbifolder_geometry_dir` resolve the upstream executables
+via `OrbiFolder_jll`/`NonSUSYOrbiFolder_jll`. These come from BinaryBuilder/Yggdrasil
+recipes (`JuliaPackaging/Yggdrasil#14471` and `#14999`) that build both tools
+for Linux (glibc and musl; x86_64, aarch64, i686, armv6l/armv7l, powerpc64le,
+riscv64) and bundle each tool's `Geometry/` directory alongside its executable.
+
+**OrbifolderBridge therefore supports Linux only.** Upstream instantiates
+`std::complex<boost::rational<int>>`, which libc++ (the default C++ library on
+macOS and FreeBSD, and the one BinaryBuilder uses for those targets) cannot compile,
+so there are no JLL builds for macOS, FreeBSD, or Windows.
 
 ## Build dependencies
 
@@ -460,13 +468,13 @@ The checked-in parser fixtures currently target `orbifolder` 1.2.1 and
 `nonSUSYorbifolder` 1.0. These are also the only versions accepted by the
 runtime compatibility table.
 
-1. Re-run `autoreconf -fi && ./configure && make` (nonSUSYorbifolder) or just
-   `./configure && make` (orbifolder) against the new tarball/checkout; diff
-   `cprompt.cpp`'s `command_names_*` tables against the previous version to
-   catch new/renamed commands.
-2. Re-run the fixture-generating commands above and diff against
-   `test/fixtures/` to catch output-format drift before it breaks the parser.
-3. Check `ChangeLog`/`AUTHORS` and the paper version referenced in `main.cpp`'s
-   startup banner for the new version string.
+1. Update the Yggdrasil recipe to the new upstream release and wait for the new
+   `OrbiFolder_jll`/`NonSUSYOrbiFolder_jll` version to be registered.
+2. Diff `cprompt.cpp`'s `command_names_*` tables against the previous version
+   to catch new/renamed commands, and check `ChangeLog` and `main.cpp`'s startup
+   banner for the new version string.
+3. Raise the JLL compat bound in `Project.toml`, re-run the fixture-generating
+   commands above with the new JLL binaries, and diff against `test/fixtures/`
+   to catch output-format drift before it breaks the parser.
 4. Add the new version to the compatibility table only after all SUSY or
-   non-SUSY parser fixtures and real-backend smoke tests pass.
+   non-SUSY parser fixtures and real-backend tests pass.

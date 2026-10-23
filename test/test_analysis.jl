@@ -96,16 +96,9 @@ end
     @test_throws ArgumentError analyze_batch(OrbifolderModel[]; include = [:spectrum], ntasks = 0)
 end
 
-@testset "integrated analysis against real binaries (skipped if unavailable)" begin
-    backends = [
-        (:susy, joinpath(@__DIR__, "..", "vendor", "orbifolder", "src", "orbifolder", "orbifolder"),
-         "ORBIFOLDER_BIN", "ORBIFOLDER_GEOMETRY_DIR"),
-        (:nonsusy, joinpath(@__DIR__, "..", "vendor", "nonSUSYorbifolder", "nonSUSYorbifolder"),
-         "NONSUSYORBIFOLDER_BIN", "NONSUSYORBIFOLDER_GEOMETRY_DIR"),
-    ]
-    for (mode, binary, binary_env, geometry_env) in backends
-        isfile(binary) || continue
-        withenv(binary_env => binary, geometry_env => nothing) do
+@testset "integrated analysis against the bundled JLL (skipped if unavailable)" begin
+    for mode in (:susy, :nonsusy)
+        _with_jll_backend(mode) do
             model = _analysis_model(mode)
             result = analyze(
                 model;

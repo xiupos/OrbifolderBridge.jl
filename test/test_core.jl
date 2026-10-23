@@ -1,40 +1,20 @@
+using OrbiFolder_jll: OrbiFolder_jll
+using NonSUSYOrbiFolder_jll: NonSUSYOrbiFolder_jll
+
 @testset "mode validation" begin
     @test_throws ArgumentError orbifolder_binary(:bogus)
     @test_throws ArgumentError orbifolder_geometry_dir(:bogus)
 end
 
-@testset "binary detection" begin
-    withenv("ORBIFOLDER_BIN" => nothing, "NONSUSYORBIFOLDER_BIN" => nothing) do
-        @test_throws ErrorException orbifolder_binary(:susy)
-    end
-
-    mktempdir() do dir
-        binpath = joinpath(dir, "fake_orbifolder")
-        write(binpath, "#!/bin/sh\necho fake\n")
-        chmod(binpath, 0o755)
-        withenv("ORBIFOLDER_BIN" => binpath) do
-            @test orbifolder_binary(:susy) == binpath
-        end
-    end
-end
-
-@testset "geometry dir fallback next to binary" begin
-    mktempdir() do treeroot
-        # nonSUSY-style layout: binary and Geometry/ as siblings
-        binpath = joinpath(treeroot, "nonSUSYorbifolder")
-        write(binpath, "#!/bin/sh\n")
-        mkpath(joinpath(treeroot, "Geometry"))
-        withenv("NONSUSYORBIFOLDER_BIN" => binpath, "NONSUSYORBIFOLDER_GEOMETRY_DIR" => nothing) do
-            @test orbifolder_geometry_dir(:nonsusy) == joinpath(treeroot, "Geometry")
-        end
-
-        # SUSY-style layout: binary two levels below the tree root
-        deepbin = joinpath(treeroot, "src", "orbifolder", "orbifolder")
-        mkpath(dirname(deepbin))
-        write(deepbin, "#!/bin/sh\n")
-        withenv("ORBIFOLDER_BIN" => deepbin, "ORBIFOLDER_GEOMETRY_DIR" => nothing) do
-            @test isdir(orbifolder_geometry_dir(:susy))
-            @test realpath(orbifolder_geometry_dir(:susy)) == realpath(joinpath(treeroot, "Geometry"))
+@testset "backend resolution from the JLL" begin
+    for (mode, jll) in (:susy => OrbiFolder_jll, :nonsusy => NonSUSYOrbiFolder_jll)
+        if jll.is_available()
+            @test dirname(orbifolder_binary(mode)) == joinpath(jll.artifact_dir, "bin")
+            @test orbifolder_geometry_dir(mode) == joinpath(jll.artifact_dir, "bin", "Geometry")
+            @test isdir(orbifolder_geometry_dir(mode))
+        else
+            @test_throws ErrorException orbifolder_binary(mode)
+            @test_throws ErrorException orbifolder_geometry_dir(mode)
         end
     end
 end
@@ -61,31 +41,20 @@ end
     @test terr isa OrbifolderTimeoutError
 end
 
-@testset "run_orbifolder_script against real binaries (skipped if unavailable)" begin
-    nonsusy_bin = joinpath(@__DIR__, "..", "vendor", "nonSUSYorbifolder", "nonSUSYorbifolder")
-    susy_bin = joinpath(@__DIR__, "..", "vendor", "orbifolder", "src", "orbifolder", "orbifolder")
-
-    if isfile(nonsusy_bin)
-        withenv("NONSUSYORBIFOLDER_BIN" => nonsusy_bin, "NONSUSYORBIFOLDER_GEOMETRY_DIR" => nothing) do
-            model = read(joinpath(@__DIR__, "fixtures", "nonsusy", "modelZ3_1_1.txt"), String)
+@testset "run_orbifolder_script against the bundled JLL (skipped if unavailable)" begin
+    # Launches the JLL executable with its bundled Geometry/, which also covers
+    # the environment its dependency artifacts need.
+    for (mode, model, label, expected) in (
+        (:nonsusy, "modelZ3_1_1.txt", "Z3_1_1", "SO(10) x SU(3) and SO(16) and U(1)"),
+        (:susy, "modelMSSM0.txt", "MSSM0", "SU(3) x SU(2) and SU(3) x SU(2) x SU(2) and U(1)^9"),
+    )
+        _with_jll_backend(mode) do
             out = run_orbifolder_script(
-                :nonsusy,
-                ["load orbifolds(modelZ3_1_1.txt)", "cd Z3_1_1", "cd spectrum", "print summary"];
-                files = Dict("modelZ3_1_1.txt" => model),
+                mode,
+                ["load orbifolds($model)", "cd $label", "cd spectrum", "print summary"];
+                files = Dict(model => read(joinpath(@__DIR__, "fixtures", String(mode), model), String)),
             )
-            @test occursin("SO(10) x SU(3) and SO(16) and U(1)", out)
-        end
-    end
-
-    if isfile(susy_bin)
-        withenv("ORBIFOLDER_BIN" => susy_bin, "ORBIFOLDER_GEOMETRY_DIR" => nothing) do
-            model = read(joinpath(@__DIR__, "fixtures", "susy", "modelMSSM0.txt"), String)
-            out = run_orbifolder_script(
-                :susy,
-                ["load orbifolds(modelMSSM0.txt)", "cd MSSM0", "cd spectrum", "print summary"];
-                files = Dict("modelMSSM0.txt" => model),
-            )
-            @test occursin("SU(3) x SU(2) and SU(3) x SU(2) x SU(2) and U(1)^9", out)
+            @test occursin(expected, out)
         end
     end
 end

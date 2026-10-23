@@ -110,7 +110,7 @@ end
     available_space_groups(model; timeout = 120) -> Vector{SpaceGroupInfo}
 
 Ask upstream to enumerate Geometry files compatible with `model`'s point
-group. The result reflects the configured backend's staged `Geometry/`
+group. The result reflects the backend's staged `Geometry/`
 directory rather than a filename convention implemented by the bridge.
 """
 function available_space_groups(model::OrbifolderModel; timeout::Real = 120)

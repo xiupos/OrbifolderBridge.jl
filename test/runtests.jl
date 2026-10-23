@@ -1,6 +1,10 @@
 using Test
 using OrbifolderBridge
 
+# Runs `f` against the bundled JLL backend; skipped on platforms without a JLL build.
+_with_jll_backend(f, mode::Symbol) =
+    OrbifolderBridge._jll_module(mode).is_available() ? f() : nothing
+
 @testset "OrbifolderBridge.jl" verbose = true begin
     include("test_core.jl")
     include("test_backend.jl")

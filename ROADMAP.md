@@ -39,11 +39,12 @@ status of OrbifolderBridge.
 ## Phase 2: Backend discovery and compatibility
 
 - [x] **`[bridge]`** Detect the backend kind and version.
-- [x] **`[bridge]`** Validate the configured binary and Geometry directory together.
 - [x] **`[bridge]`** Report backend capabilities through a typed API.
 - [x] **`[bridge]`** Associate parsers with the output versions they support.
 - [x] **`[bridge]`** Fail clearly on unsupported output instead of returning partial data.
 - [x] **`[bridge]`** Add a lightweight backend self-test.
+- [x] **`[bridge]`** Provide the upstream binaries and Geometry data through
+      `OrbiFolder_jll`/`NonSUSYOrbiFolder_jll` (Linux only).
 
 ## Phase 3: Upstream model generation and classification
 

@@ -28,8 +28,9 @@ temporary directory, and parses the text transcript back into Julia structs — 
 further mapped onto genuine `Oscar.RootSystem`/`Oscar.WeightLatticeElem` objects for the gauge
 group and matter representations.
 
-**You must build `orbifolder`/`nonSUSYorbifolder` yourself** — this package does not bundle or
-auto-build them. See [Installation](@ref) below.
+**OrbifolderBridge supports Linux only.** `orbifolder`/`nonSUSYorbifolder` are installed
+automatically as the `OrbiFolder_jll`/`NonSUSYOrbiFolder_jll` dependencies. Upstream does not
+build on macOS, FreeBSD, or Windows.
 
 ## Installation
 
@@ -39,48 +40,6 @@ Add the package (development mode, since it is unregistered):
 using Pkg
 Pkg.develop(url="https://github.com/xiupos/OrbifolderBridge.jl")
 ```
-
-### Building the upstream tools
-
-Build whichever backend(s) you need from source and make sure the resulting binary is
-discoverable — either on `PATH`, or via environment variables / [`Preferences.jl`](@ref
-set_orbifolder_binary!) settings. See [Upstream Notes](@ref) for build dependencies (GSL,
-Boost, GNU Readline, and — for `nonSUSYorbifolder` — Autotools) and troubleshooting notes.
-
-```bash
-# nonSUSYorbifolder
-git clone https://github.com/StringsIFUNAM/nonSUSYorbifolder.git
-cd nonSUSYorbifolder
-autoreconf -fi   # the repo doesn't ship pre-generated autotools files
-./configure && make
-# -> ./nonSUSYorbifolder
-
-# orbifolder (SUSY)
-curl -O https://orbifolder.hepforge.org/source/V1.2.1/orbifolder-1.2.1.tgz
-tar xzf orbifolder-1.2.1.tgz && cd orbifolder-1.2.1
-./configure && make
-# -> ./src/orbifolder/orbifolder
-```
-
-Then either put the binaries on `PATH` under their upstream names (`orbifolder`,
-`nonSUSYorbifolder`), or point at them explicitly:
-
-```julia
-using OrbifolderBridge
-
-# one-off, for this session:
-ENV["ORBIFOLDER_BIN"] = "/path/to/orbifolder"
-ENV["NONSUSYORBIFOLDER_BIN"] = "/path/to/nonSUSYorbifolder"
-
-# or persisted across sessions via Preferences.jl:
-set_orbifolder_binary!(:susy, "/path/to/orbifolder")
-set_orbifolder_binary!(:nonsusy, "/path/to/nonSUSYorbifolder")
-```
-
-Each backend also needs its `Geometry/` directory (shipped space-group definition files, at
-the root of the source tree you built). By default it's found automatically next to the
-binary; override with `ORBIFOLDER_GEOMETRY_DIR`/`NONSUSYORBIFOLDER_GEOMETRY_DIR` or
-[`set_orbifolder_geometry_dir!`](@ref) if it isn't.
 
 ## Quick start
 

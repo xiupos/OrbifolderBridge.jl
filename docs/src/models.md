@@ -26,7 +26,7 @@ model = OrbifolderModel(;
 
 `mode` selects `:susy` (`orbifolder`) or `:nonsusy`
 (`nonSUSYorbifolder`). `point_group = "Z3_1_1"` resolves to the
-corresponding file below the configured `Geometry/` directory. All shifts and
+corresponding file in the backend's `Geometry/` directory. All shifts and
 Wilson lines have 16 rational entries. Missing Wilson lines are filled with
 zero vectors.
 

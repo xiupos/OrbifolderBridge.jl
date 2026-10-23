@@ -3,8 +3,7 @@ module OrbifolderBridge
 using Oscar
 using SHA
 
-export orbifolder_binary, set_orbifolder_binary!
-export orbifolder_geometry_dir, set_orbifolder_geometry_dir!
+export orbifolder_binary, orbifolder_geometry_dir
 export BackendInfo, BackendCompatibilityError, BackendSelfTest
 export backend_info, supports, check_backend
 export OrbifolderProcessError, OrbifolderTimeoutError, run_capture

@@ -22,14 +22,17 @@ function _run_orbifolder_script_artifacts(
         write(joinpath(dir, command_file), join(vcat(commands, "exit"), '\n') * '\n')
 
         if mode === :nonsusy
-            run_capture(Cmd(`$binary script $command_file`; dir = dir); timeout = timeout)
+            run_capture(
+                _orbifolder_withenv(mode, Cmd(`$binary script $command_file`; dir = dir));
+                timeout = timeout,
+            )
             result_file = joinpath(dir, "result_$command_file")
             isfile(result_file) ||
                 error("nonSUSYorbifolder script mode did not produce $result_file")
             output = read(result_file, String)
         else
             output = run_capture(
-                Cmd(`$binary`; dir = dir);
+                _orbifolder_withenv(mode, Cmd(`$binary`; dir = dir));
                 input = "load program($command_file)\nyes\n",
                 timeout = timeout,
             )
@@ -66,7 +69,7 @@ end
                            files::AbstractDict{<:AbstractString,<:AbstractString} = Dict{String,String}(),
                            timeout::Real = 120) -> String
 
-Run commands using the configured backend and return its raw transcript. The
+Run commands using the backend for `mode` and return its raw transcript. The
 backend kind and output version are validated before the transcript is
 returned. See [`backend_info`](@ref) for configuration inspection.
 """

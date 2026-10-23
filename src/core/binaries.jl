@@ -1,4 +1,5 @@
-using Preferences
+using OrbiFolder_jll: OrbiFolder_jll
+using NonSUSYOrbiFolder_jll: NonSUSYOrbiFolder_jll
 
 const _VALID_MODES = (:susy, :nonsusy)
 
@@ -8,119 +9,54 @@ function _check_mode(mode::Symbol)
     return mode
 end
 
-_binary_envvar(mode::Symbol) = mode === :susy ? "ORBIFOLDER_BIN" : "NONSUSYORBIFOLDER_BIN"
-_geometry_envvar(mode::Symbol) = mode === :susy ? "ORBIFOLDER_GEOMETRY_DIR" : "NONSUSYORBIFOLDER_GEOMETRY_DIR"
-_binary_prefkey(mode::Symbol) = mode === :susy ? "orbifolder_bin" : "nonsusyorbifolder_bin"
-_geometry_prefkey(mode::Symbol) = mode === :susy ? "orbifolder_geometry_dir" : "nonsusyorbifolder_geometry_dir"
+_binary_name(mode::Symbol) = mode === :susy ? "orbifolder" : "nonSUSYorbifolder"
+_jll_module(mode::Symbol) = mode === :susy ? OrbiFolder_jll : NonSUSYOrbiFolder_jll
+
+# On platforms without a JLL build, `is_available()` is false rather than a
+# load error, so the JLLs are safe as unconditional dependencies.
+function _available_jll(mode::Symbol)
+    jll = _jll_module(mode)
+    jll.is_available() || error(
+        "No $(_binary_name(mode)) build is available for $(Sys.KERNEL) ($(Sys.ARCH)). " *
+        "OrbifolderBridge supports Linux only, where $(_binary_name(mode)) is provided by " *
+        "$(nameof(jll))."
+    )
+    return jll
+end
+
+# The JLL executable needs the environment its wrapper `Cmd` carries: dependency
+# artifacts such as GSL are not on its RPATH.
+function _orbifolder_withenv(mode::Symbol, cmd::Cmd)
+    return addenv(cmd, getproperty(_available_jll(mode), Symbol(_binary_name(mode)))().env)
+end
 
 """
     orbifolder_binary(mode::Symbol) -> String
 
-Resolve the path to the `orbifolder` (`mode = :susy`) or `nonSUSYorbifolder`
-(`mode = :nonsusy`) executable.
+Return the path to the `orbifolder` (`mode = :susy`) or `nonSUSYorbifolder`
+(`mode = :nonsusy`) executable provided by `OrbiFolder_jll`/`NonSUSYOrbiFolder_jll`.
 
-Resolution order: the environment variable (`ORBIFOLDER_BIN` /
-`NONSUSYORBIFOLDER_BIN`), then a `Preferences.jl` setting stored via
-[`set_orbifolder_binary!`](@ref), then a bare executable name on `PATH`.
+Throws an `ErrorException` on platforms without a JLL build. OrbifolderBridge
+supports Linux only, because upstream does not build elsewhere.
 
-The returned path is always absolute. Every backend invocation runs in its own
-temporary working directory, so a relative path configured against the caller's
-current directory would otherwise be resolved against that temporary directory
-and fail to spawn.
-
-Throws an `ErrorException` with build instructions if no usable binary is found.
-See `docs/src/upstream_notes.md` for how to build the upstream tools.
+# Examples
+```julia
+julia> orbifolder_binary(:susy)
+"/home/user/.julia/artifacts/<hash>/bin/orbifolder"
+```
 """
 function orbifolder_binary(mode::Symbol)
     _check_mode(mode)
-    path = get(ENV, _binary_envvar(mode), nothing)
-    path === nothing && (path = @load_preference(_binary_prefkey(mode)))
-    fallback_name = mode === :susy ? "orbifolder" : "nonSUSYorbifolder"
-    path === nothing && (path = Sys.which(fallback_name))
-
-    if path === nothing || !isfile(path)
-        error(
-            "Could not locate the $(mode === :susy ? "orbifolder" : "nonSUSYorbifolder") " *
-            "executable. Build it from source (see docs/src/upstream_notes.md) and either " *
-            "put it on PATH, set the environment variable $(_binary_envvar(mode)), or call " *
-            "set_orbifolder_binary!(:$mode, \"/path/to/binary\")."
-        )
-    end
-    # Deliberately abspath rather than normpath: a `..` component may traverse a
-    # symlinked source tree, where lexical normalization would change meaning.
-    return abspath(path)
-end
-
-"""
-    set_orbifolder_binary!(mode::Symbol, path::AbstractString)
-
-Persist the path to the `orbifolder`/`nonSUSYorbifolder` executable for `mode`
-(`:susy` or `:nonsusy`) as a `Preferences.jl` setting in the active project, so
-it doesn't need to be set again in future Julia sessions.
-"""
-function set_orbifolder_binary!(mode::Symbol, path::AbstractString)
-    _check_mode(mode)
-    isfile(path) || throw(ArgumentError("no file at $path"))
-    @set_preferences!(_binary_prefkey(mode) => String(path))
-    return path
+    return getproperty(_available_jll(mode), Symbol(_binary_name(mode), "_path"))
 end
 
 """
     orbifolder_geometry_dir(mode::Symbol) -> String
 
-Resolve the `Geometry/` directory (space-group definition files) that ships
-with the upstream source tree for `mode`.
-
-Resolution order: the environment variable (`ORBIFOLDER_GEOMETRY_DIR` /
-`NONSUSYORBIFOLDER_GEOMETRY_DIR`), then a `Preferences.jl` setting stored via
-[`set_orbifolder_geometry_dir!`](@ref), then a `Geometry` directory next to
-[`orbifolder_binary`](@ref)`(mode)` (checking both the binary's own directory
-and its parent, since the SUSY binary lives in `src/orbifolder/` under the
-source tree while `Geometry/` sits at the tree root).
-
-The returned path is always absolute, because it is symlinked into the
-temporary working directory of each backend invocation.
+Return the `Geometry/` directory (space-group definition files) bundled in the
+JLL artifact for `mode`, next to the executable.
 """
 function orbifolder_geometry_dir(mode::Symbol)
     _check_mode(mode)
-    dir = get(ENV, _geometry_envvar(mode), nothing)
-    dir === nothing && (dir = @load_preference(_geometry_prefkey(mode)))
-
-    if dir === nothing
-        bindir = dirname(orbifolder_binary(mode))
-        # The nonSUSY binary sits at the source-tree root next to Geometry/;
-        # the SUSY binary sits two levels down, in src/orbifolder/.
-        for candidate in (
-            joinpath(bindir, "Geometry"),
-            joinpath(bindir, "..", "Geometry"),
-            joinpath(bindir, "..", "..", "Geometry"),
-        )
-            if isdir(candidate)
-                dir = candidate
-                break
-            end
-        end
-    end
-
-    if dir === nothing || !isdir(dir)
-        error(
-            "Could not locate the Geometry/ directory for mode :$mode. Set the environment " *
-            "variable $(_geometry_envvar(mode)), or call " *
-            "set_orbifolder_geometry_dir!(:$mode, \"/path/to/Geometry\")."
-        )
-    end
-    return abspath(dir)
-end
-
-"""
-    set_orbifolder_geometry_dir!(mode::Symbol, dir::AbstractString)
-
-Persist the path to the `Geometry/` directory for `mode` (`:susy` or
-`:nonsusy`) as a `Preferences.jl` setting in the active project.
-"""
-function set_orbifolder_geometry_dir!(mode::Symbol, dir::AbstractString)
-    _check_mode(mode)
-    isdir(dir) || throw(ArgumentError("no directory at $dir"))
-    @set_preferences!(_geometry_prefkey(mode) => String(dir))
-    return dir
+    return joinpath(_available_jll(mode).artifact_dir, "bin", "Geometry")
 end

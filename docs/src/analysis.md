@@ -50,7 +50,7 @@ context = ComputationContext(
 result = analyze(context; include = [:spectrum, :twist])
 ```
 
-It validates the configured backend and requires its kind to match the model.
+It validates the backend and requires its kind to match the model.
 As with the smaller computation APIs, omitting `config` retains the backend's
 initial configuration for compatibility; reproducible analyses should select
 one explicitly.

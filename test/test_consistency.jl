@@ -68,30 +68,24 @@ end
     @test_throws ArgumentError check_consistency_batch(models; ntasks = 0)
 end
 
-@testset "consistency against real binaries (skipped if unavailable)" begin
-    nonsusy_bin = joinpath(@__DIR__, "..", "vendor", "nonSUSYorbifolder", "nonSUSYorbifolder")
-    if isfile(nonsusy_bin)
-        withenv("NONSUSYORBIFOLDER_BIN" => nonsusy_bin, "NONSUSYORBIFOLDER_GEOMETRY_DIR" => nothing) do
-            model = OrbifolderModel(;
-                mode = :nonsusy, label = "Z3_1_1", point_group = "Z3_1_1",
-                shift = (_NONSUSY_SHIFT1, _NONSUSY_SHIFT2),
-            )
-            result = check_consistency(model)
-            @test result.valid
-            @test OrbifolderBridge.is_consistent(model) == result.valid
-        end
+@testset "consistency against the bundled JLL (skipped if unavailable)" begin
+    _with_jll_backend(:nonsusy) do
+        model = OrbifolderModel(;
+            mode = :nonsusy, label = "Z3_1_1", point_group = "Z3_1_1",
+            shift = (_NONSUSY_SHIFT1, _NONSUSY_SHIFT2),
+        )
+        result = check_consistency(model)
+        @test result.valid
+        @test OrbifolderBridge.is_consistent(model) == result.valid
     end
 
-    susy_bin = joinpath(@__DIR__, "..", "vendor", "orbifolder", "src", "orbifolder", "orbifolder")
-    if isfile(susy_bin)
-        withenv("ORBIFOLDER_BIN" => susy_bin, "ORBIFOLDER_GEOMETRY_DIR" => nothing) do
-            zero16 = zeros(Rational{Int}, 16)
-            model = OrbifolderModel(;
-                mode = :susy, label = "MSSM0", point_group = "Z3xZ3_1_1",
-                shift = (_SUSY_SHIFT1, _SUSY_SHIFT2),
-                wilson_lines = [zero16, zero16, _SUSY_WL3, _SUSY_WL3, zero16, zero16],
-            )
-            @test check_consistency(model).valid
-        end
+    _with_jll_backend(:susy) do
+        zero16 = zeros(Rational{Int}, 16)
+        model = OrbifolderModel(;
+            mode = :susy, label = "MSSM0", point_group = "Z3xZ3_1_1",
+            shift = (_SUSY_SHIFT1, _SUSY_SHIFT2),
+            wilson_lines = [zero16, zero16, _SUSY_WL3, _SUSY_WL3, zero16, zero16],
+        )
+        @test check_consistency(model).valid
     end
 end

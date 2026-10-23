@@ -11,10 +11,12 @@ constructing and analyzing heterotic string orbifold compactifications, for use 
 > **⚠ EXPERIMENTAL — NO MAINTENANCE GUARANTEE.** Not registered in the Julia General registry;
 > expect breaking changes without notice. Do not depend on it in production code.
 
-**See the [documentation](https://xiupos.github.io/OrbifolderBridge.jl/dev/) for installation
-(you must build `orbifolder`/`nonSUSYorbifolder` yourself), usage, and the full API reference.**
+**Linux only.** The upstream `orbifolder`/`nonSUSYorbifolder` tools are installed
+automatically via `OrbiFolder_jll`/`NonSUSYOrbiFolder_jll`. See the
+[documentation](https://xiupos.github.io/OrbifolderBridge.jl/dev/) for installation, usage,
+and the full API reference.
 
 ## License
 
-[MIT](LICENSE) for this bridge package. The upstream `orbifolder`/`nonSUSYorbifolder` tools
-you build and run separately are licensed under the GPL — see their respective repositories.
+[MIT](LICENSE) for this bridge package. The upstream `orbifolder`/`nonSUSYorbifolder` tools,
+which run as separate processes, are licensed under the GPL — see their respective repositories.

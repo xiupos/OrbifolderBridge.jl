@@ -4,14 +4,16 @@ authors = ["xiupos <me@xiupos.net> and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
+NonSUSYOrbiFolder_jll = "b75b6384-185e-5346-bdf3-5c05589aa819"
+OrbiFolder_jll = "18eeeee5-a3f5-5ccc-8fa7-488edfeb05d2"
 Oscar = "f1435218-dba5-11e9-1e4d-f1a5fab5fc13"
-Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [compat]
 julia = "1.10.10"
+NonSUSYOrbiFolder_jll = "1.0.0"
+OrbiFolder_jll = "1.2.1"
 Oscar = "1"
-Preferences = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
